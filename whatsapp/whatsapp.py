@@ -6,60 +6,101 @@ Created on Sun Sep  4 12:10:34 2022
 """
 
 import time
+
 from selenium import webdriver
+
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+
+from selenium.common.exceptions import NoSuchElementException
 
 from whatsapp.constants import PATH_DRIVER_CHROME
 from whatsapp.constants import BASE_URL
+from whatsapp.constants import CHAT_LIST_CONTAINER
 
 class Whatsapp(webdriver.Chrome):
     
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
         self.driver_path = driver_path
         super(Whatsapp, self).__init__()
-    
+
     
     # Returns the list of sub-divs contained in 'recentList' main div
     def getChats(self):
         self.implicitly_wait(150)
-        recentList = self.find_element(by=By.XPATH, value='//*[@id="pane-side"]/div[2]/div/div')
+        recentList = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
         return recentList.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
-            
         
-        
+
+
     def landFirstPage(self):
-        nPixels = 500
-        chatLabels = []
-        chatNames = []
+        nScrolls = 0
+        namesBeforeScrolling = []
+        namesAfterScrolling = []
         self.get(BASE_URL)
-        self.implicitly_wait(150)
         
-        # List containing WebElements associated to
-        # single contacts before the page is scrolled down
-        chatsBeforeScrolling = self.getChats()
+        self.waitForElementToAppear(60, '//*[@id="pane-side"]/button/div/div[2]/div/div')
         
-        for chat in chatsBeforeScrolling:
-            # Every contact's name is appended to the name list to be returned
-            chatNames.append(chat.get_attribute('title'))
+        self.implicitly_wait(60)        
+        chats = self.getChats()
         
-        print(chatNames)
+        for chat in chats:
+            name = chat.get_attribute('title')
+            if(len(name) != 0):
+                namesBeforeScrolling.append(chat.get_attribute('title'))
+            
+        pixels = 0
+        pre_height = 0
+        new_height = 0
+        while True:
+            nScrolls += 1
+            print('Scroll n. ' + str(nScrolls) + '\n')
+            pixels += 500
+            time.sleep(0.5)
+            self.execute_script('document.getElementById("pane-side").scrollTo(0,' + str(pixels) + ')')
+            new_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
+            
+            
+            repeat = True
+            while repeat:
+
+                try:
+                    self.implicitly_wait(60)
+                    scrolledChats = self.getChats()
+                    
+                    for scrolledChat in scrolledChats:
+                        name = scrolledChat.get_attribute('title')
+                        if(len(name) != 0):
+                            namesAfterScrolling.append(name)
+                    
+                    
+                    self.updateList(namesBeforeScrolling, namesAfterScrolling)
+                    
+                    break
+                        
+                    repeat = False
+                except:
+                    self.implicitly_wait(0.1)
+            
+            for name in namesBeforeScrolling:
+                print(name)
+            
+            if(pre_height < new_height):
+                pre_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
+            else:
+                break
         
-        for contactName in chatsBeforeScrolling:
-            chatLabels.append(contactName)
+                
+    
+    def updateList(self, oldList, newList):
+        for e in newList:
+            if e not in oldList:
+                oldList.append(e)
         
-        
-        for chat in chatsBeforeScrolling:
-            self.execute_script("window.scrollBy(0,"+ str(nPixels) +");")
-            # self.execute_script("arguments[0].scrollBy(0,500)", "")
-            self.implicitly_wait(150)
-            recentList_scrolled = self.getChats()
-         
-         
-        for list_scrolled in recentList_scrolled:
-            chatLabels.append(list_scrolled)
-            chatNames.append(list_scrolled.get_attribute('title'))
-        
-        
-        print(chatNames)
-        print('\n')
-        print(len(chatNames))
+    
+    def waitForElementToAppear(self, seconds, XPath):
+        WebDriverWait(self, seconds).until(
+            EC.presence_of_element_located((By.XPATH, XPath))
+        )

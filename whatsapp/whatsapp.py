@@ -31,6 +31,11 @@ class Whatsapp(webdriver.Chrome):
         return recentList.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
         
 
+    def wait(self, seconds):
+        for i in range(0,seconds):
+            print(str(i) + '... \n')
+            time.sleep(1)
+
 
     def landFirstPage(self):
         
@@ -43,15 +48,15 @@ class Whatsapp(webdriver.Chrome):
         namesAfterScrolling = []
         
         self.get(BASE_URL)
-        self.waitForElementToAppear(60, ARCHIVED_CHATS_BUTTON)
+        self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
 
-        self.implicitly_wait(60)        
+        self.wait(5)
+
+        self.implicitly_wait(200)        
         chats = self.getChats()
         
-        print('Stampa a caso, perché sennò non funziona...')
-        
         namesBeforeScrolling = self.fillNameList(chats)
-
+        
         while True:
             nScrolls += 1
             pixels += 500
@@ -62,7 +67,7 @@ class Whatsapp(webdriver.Chrome):
             while True:
 
                 try:
-                    self.implicitly_wait(60)
+                    self.implicitly_wait(200)
                     scrolledChats = self.getChats()
                     
                     namesAfterScrolling = self.fillNameList(scrolledChats)
@@ -72,18 +77,17 @@ class Whatsapp(webdriver.Chrome):
                     break
                         
                 except:
-                    self.implicitly_wait(0.1)
+                    self.implicitly_wait(0.5)
             
             if(pre_height < new_height):
                 pre_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
             else:
                 break
-        
+        print(namesBeforeScrolling)
 
     def fillNameList(self, spanList):
-        print('Altra stampa a caso: stavolta in un metodo')
         nameList = []
-        self.implicitly_wait(60)
+        self.implicitly_wait(200)
         for span in spanList:
             name = span.get_attribute('title')
             if(len(name) != 0):

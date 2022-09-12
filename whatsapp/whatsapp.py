@@ -19,6 +19,10 @@ from whatsapp.constants import ARCHIVED_CHATS_BUTTON
 from whatsapp.constants import CHAT_SECTION_HTML_ID
 from whatsapp.constants import CHAT_MESSAGES_CONTAINER
 
+import pandas as pd
+
+import openpyxl
+
 class Whatsapp(webdriver.Chrome):
     
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
@@ -175,4 +179,18 @@ class Whatsapp(webdriver.Chrome):
                 else:
                     break
         
+    
+    def readContactsFromFile(self, pathToFile):
+        contacts = pd.read_csv(pathToFile)
+        print(len(contacts['Nome'].values))
+        
+    # def readContactsByFile(self, pathToFile):
+    #     excel_document = openpyxl.load_workbook(pathToFile)
+    #     print(type(excel_document))
+    #     sheet = excel_document.get_sheet_by_name('Foglio1')
+        
+    #     multiple_cells = sheet['A1':'B4']
+    #     for row in multiple_cells:
+    #         for cell in row:
+    #             print(cell.value)
         

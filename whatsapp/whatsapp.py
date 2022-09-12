@@ -81,6 +81,7 @@ class Whatsapp(webdriver.Chrome):
         
 
     def fillNameList(self, spanList):
+        print('Altra stampa a caso: stavolta in un metodo')
         nameList = []
         self.implicitly_wait(60)
         for span in spanList:

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Sep  4 12:10:34 2022
-
 @author: guido
 """
 
@@ -48,6 +47,8 @@ class Whatsapp(webdriver.Chrome):
 
         self.implicitly_wait(60)        
         chats = self.getChats()
+        
+        print('Stampa a caso, perché sennò non funziona...')
         
         namesBeforeScrolling = self.fillNameList(chats)
 

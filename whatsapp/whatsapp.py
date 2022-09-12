@@ -39,73 +39,9 @@ class Whatsapp(webdriver.Chrome):
     # Stops the program for the given number of seconds
     def wait(self, seconds):
         for i in range(0,seconds):
-            # print(str(i) + '... \n')
             time.sleep(1)
 
 
-    # Opens the browser and does all the rest
-    def landFirstPage(self):
-        
-        pixels = 0
-        pre_height = 0
-        new_height = 0
-        
-        namesBeforeScrolling = []
-        namesAfterScrolling = []
-        
-        self.get(BASE_URL)
-        self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
-
-        self.wait(5)
-
-        chats = self.getContacts()
-        
-        namesBeforeScrolling = self.fillNameList(chats)
-        
-        while True:
-            pixels += 500
-            time.sleep(0.5)
-            self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
-            new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-            
-            while True:
-
-                try:
-                    self.implicitly_wait(200)
-                    scrolledChats = self.getContacts()
-                    
-                    namesAfterScrolling = self.fillNameList(scrolledChats)
-                    
-                    self.updateList(namesBeforeScrolling, namesAfterScrolling)
-                    
-                    break
-                        
-                except:
-                    self.implicitly_wait(0.5)
-            
-            if(pre_height < new_height):
-                pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-            else:
-                break
-        print(namesBeforeScrolling)
-
-
-
-    def fillNameList(self, spanList):
-        nameList = []
-        self.implicitly_wait(200)
-        for span in spanList:
-            name = span.get_attribute('title')
-            if(len(name) != 0):
-                nameList.append(name)
-        return nameList
-         
-    
-    def updateList(self, oldList, newList):
-        for e in newList:
-            if e not in oldList:
-                oldList.append(e)
-        
     
     def waitForElementToAppear(self, seconds, XPath):
         WebDriverWait(self, seconds).until(

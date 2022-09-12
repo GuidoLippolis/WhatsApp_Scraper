@@ -5,5 +5,6 @@ Created on Sun Sep  4 12:10:48 2022
 @author: guido
 """
 
-PATH_DRIVER_CHROME = "C:/Users/guido/OneDrive/Desktop/WhatsApp_Scraper_Lippolis-Marchitelli-Gennaro/"
+PATH_DRIVER_CHROME = "C:/GitHub_Repositories/WhatsApp_Scraper/drivers"
 BASE_URL = "https://web.whatsapp.com/"
+CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'

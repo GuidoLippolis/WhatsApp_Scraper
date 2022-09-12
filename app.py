@@ -13,17 +13,10 @@ class App(tk.Tk):
         super().__init__()
 
         self.title('Tkinter MVC Demo')
-        # self.resizable(False, False)
+        self.geometry("900x625")
+        self.resizable(False, False)
+        self.grid_columnconfigure(0, weight=1)
 
         # create a view and place it on the root window
         view = View(self)
         view.grid(row=0, column=0, padx=10, pady=10)
-
-        # create a model
-        # model = Model('hello@pythontutorial.net')
-
-        # create a controller
-        # controller = Controller(model, view)
-
-        # set the controller to view
-        # view.set_controller(controller)

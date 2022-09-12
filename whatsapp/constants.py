@@ -12,7 +12,7 @@ BASE_URL = "https://web.whatsapp.com/"
 CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'
 
 # Contenitore della chat
-CHAT_MESSAGES_CONTAINER = '//*[@id="main"]/div[3]/div/div[2]/div[3]'
+CHAT_MESSAGES_CONTAINER = '/html/body/div[1]/div/div/div[4]/div/div[3]/div/div[2]/div[3]'
 
 
 ARCHIVED_CHATS_BUTTON = '//*[@id="pane-side"]/button/div/div[2]/div/div'

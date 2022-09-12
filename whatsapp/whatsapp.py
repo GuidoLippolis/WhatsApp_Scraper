@@ -36,6 +36,7 @@ class Whatsapp(webdriver.Chrome):
         recentList = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
         return recentList.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
         
+    
     # Stops the program for the given number of seconds
     def wait(self, seconds):
         for i in range(0,seconds):
@@ -48,15 +49,28 @@ class Whatsapp(webdriver.Chrome):
             EC.presence_of_element_located((By.XPATH, XPath))
         )
         
+        
     
     def searchContactToClick(self, contacts, contactToSearch):
         for contact in contacts:
-            self.wait(2)
+            self.wait(1)
             name = contact.get_attribute('title')
             if(len(name) != 0):
                 if(name == contactToSearch):
                     contact.click()
                     return True
+    
+    
+    
+    def fillNameList(self, spanList):
+        nameList = []
+        self.implicitly_wait(60)
+        for span in spanList:
+            name = span.get_attribute('title')
+            if(len(name) != 0):
+                nameList.append(name)
+        return nameList
+    
     
     
     def getChatOfContact(self):
@@ -65,16 +79,23 @@ class Whatsapp(webdriver.Chrome):
         pixels = 0
         pre_height = 0
         new_height = 0
+        nScrolls = 0
         
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
         
-        self.wait(5)
+        self.wait(1)
         chats = self.getContacts()
+        
+        print('Prima di scrollare erano presenti: \n')
+        chatsAsStrings = self.fillNameList(chats)
+        print(chatsAsStrings)
         
         contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
         
         for contactName in contactNamesFromCSV:
+            
+            print('Cercando ' + contactName + '... \n')
             
             contactFound = self.searchContactToClick(chats, contactName)
             
@@ -83,18 +104,26 @@ class Whatsapp(webdriver.Chrome):
             else:
                 
                 while True:
+                    nScrolls += 1
+                    print('Scroll n. ' + str(nScrolls) + '... \n')
                     pixels += 500
-                    time.sleep(0.5)
                     self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
                     new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
                     
                     while True:
                         try:
                             self.implicitly_wait(200)
-                            self.wait(5)
+                            self.wait(1)
                             scrolledChats = self.getContacts()
+                            
+                            scrolledChatsAsStrings = self.fillNameList(scrolledChats)
+                            
+                            print('Dopo lo scroll n.' + str(nScrolls) + ' ci sono: \n')
+                            print(scrolledChatsAsStrings)
                     
                             contactFoundInScrolledChats = self.searchContactToClick(scrolledChats, contactName)
+                            
+                            print('Contact found = ' + str(contactFoundInScrolledChats))
                             
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato \n')

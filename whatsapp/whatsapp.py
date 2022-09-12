@@ -48,8 +48,6 @@ class Whatsapp(webdriver.Chrome):
         self.implicitly_wait(60)        
         chats = self.getChats()
         
-        print('Stampa a caso, perché sennò non funziona...')
-        
         namesBeforeScrolling = self.fillNameList(chats)
 
         while True:

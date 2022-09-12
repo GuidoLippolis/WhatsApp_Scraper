@@ -21,8 +21,6 @@ from whatsapp.constants import CHAT_MESSAGES_CONTAINER
 
 import pandas as pd
 
-import openpyxl
-
 class Whatsapp(webdriver.Chrome):
     
     def __init__(self, driver_path = PATH_DRIVER_CHROME):

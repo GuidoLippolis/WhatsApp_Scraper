@@ -16,6 +16,7 @@ from whatsapp.constants import PATH_DRIVER_CHROME
 from whatsapp.constants import BASE_URL
 from whatsapp.constants import CHAT_LIST_CONTAINER
 from whatsapp.constants import ARCHIVED_CHATS_BUTTON
+from whatsapp.constants import CHAT_SECTION_HTML_ID
 
 class Whatsapp(webdriver.Chrome):
     
@@ -58,8 +59,8 @@ class Whatsapp(webdriver.Chrome):
         while True:
             pixels += 500
             time.sleep(0.5)
-            self.execute_script('document.getElementById("pane-side").scrollTo(0,' + str(pixels) + ')')
-            new_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
+            self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
+            new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
             
             while True:
 
@@ -77,7 +78,7 @@ class Whatsapp(webdriver.Chrome):
                     self.implicitly_wait(0.5)
             
             if(pre_height < new_height):
-                pre_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
+                pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
             else:
                 break
         print(namesBeforeScrolling)

@@ -24,25 +24,24 @@ class Whatsapp(webdriver.Chrome):
         super(Whatsapp, self).__init__()
 
     
-    # Returns the list of sub-divs contained in 'recentList' main div
-    def getChats(self):
+    # Returns the list of <span> tags contained in 'recentList' main div
+    def getContacts(self):
         self.implicitly_wait(150)
         recentList = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
         return recentList.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
         
-
+    # Stops the program for the given number of seconds
     def wait(self, seconds):
         for i in range(0,seconds):
             print(str(i) + '... \n')
             time.sleep(1)
 
-
+    # Opens the browser and does all the rest
     def landFirstPage(self):
         
         pixels = 0
         pre_height = 0
         new_height = 0
-        nScrolls = 0
         
         namesBeforeScrolling = []
         namesAfterScrolling = []
@@ -52,13 +51,11 @@ class Whatsapp(webdriver.Chrome):
 
         self.wait(5)
 
-        self.implicitly_wait(200)        
-        chats = self.getChats()
+        chats = self.getContacts()
         
         namesBeforeScrolling = self.fillNameList(chats)
         
         while True:
-            nScrolls += 1
             pixels += 500
             time.sleep(0.5)
             self.execute_script('document.getElementById("pane-side").scrollTo(0,' + str(pixels) + ')')
@@ -68,7 +65,7 @@ class Whatsapp(webdriver.Chrome):
 
                 try:
                     self.implicitly_wait(200)
-                    scrolledChats = self.getChats()
+                    scrolledChats = self.getContacts()
                     
                     namesAfterScrolling = self.fillNameList(scrolledChats)
                     

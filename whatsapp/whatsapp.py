@@ -19,6 +19,7 @@ from selenium.common.exceptions import NoSuchElementException
 from whatsapp.constants import PATH_DRIVER_CHROME
 from whatsapp.constants import BASE_URL
 from whatsapp.constants import CHAT_LIST_CONTAINER
+from whatsapp.constants import ARCHIVED_CHATS_BUTTON
 
 class Whatsapp(webdriver.Chrome):
     
@@ -36,63 +37,60 @@ class Whatsapp(webdriver.Chrome):
 
 
     def landFirstPage(self):
-        nScrolls = 0
-        namesBeforeScrolling = []
-        namesAfterScrolling = []
-        self.get(BASE_URL)
         
-        self.waitForElementToAppear(60, '//*[@id="pane-side"]/button/div/div[2]/div/div')
-        
-        self.implicitly_wait(60)        
-        chats = self.getChats()
-        
-        for chat in chats:
-            name = chat.get_attribute('title')
-            if(len(name) != 0):
-                namesBeforeScrolling.append(chat.get_attribute('title'))
-            
         pixels = 0
         pre_height = 0
         new_height = 0
+        nScrolls = 0
+        
+        namesBeforeScrolling = []
+        namesAfterScrolling = []
+        
+        self.get(BASE_URL)
+        self.waitForElementToAppear(60, ARCHIVED_CHATS_BUTTON)
+
+        self.implicitly_wait(60)        
+        chats = self.getChats()
+        
+        namesBeforeScrolling = self.fillNameList(chats)
+
         while True:
             nScrolls += 1
-            print('Scroll n. ' + str(nScrolls) + '\n')
             pixels += 500
             time.sleep(0.5)
             self.execute_script('document.getElementById("pane-side").scrollTo(0,' + str(pixels) + ')')
             new_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
             
-            
-            repeat = True
-            while repeat:
+            while True:
 
                 try:
                     self.implicitly_wait(60)
                     scrolledChats = self.getChats()
                     
-                    for scrolledChat in scrolledChats:
-                        name = scrolledChat.get_attribute('title')
-                        if(len(name) != 0):
-                            namesAfterScrolling.append(name)
-                    
+                    namesAfterScrolling = self.fillNameList(scrolledChats)
                     
                     self.updateList(namesBeforeScrolling, namesAfterScrolling)
                     
                     break
                         
-                    repeat = False
                 except:
                     self.implicitly_wait(0.1)
-            
-            for name in namesBeforeScrolling:
-                print(name)
             
             if(pre_height < new_height):
                 pre_height = self.execute_script('return document.getElementById("pane-side").scrollTop')
             else:
                 break
         
-                
+
+    def fillNameList(self, spanList):
+        nameList = []
+        self.implicitly_wait(60)
+        for span in spanList:
+            name = span.get_attribute('title')
+            if(len(name) != 0):
+                nameList.append(name)
+        return nameList
+         
     
     def updateList(self, oldList, newList):
         for e in newList:

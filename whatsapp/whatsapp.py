@@ -122,13 +122,13 @@ class Whatsapp(webdriver.Chrome):
                     contact.click()
                     return True
     
-        
+    
     def getChatOfContact(self):
-        contactName = 'Cosimo Gennaro'
         
+        endAll = False
         pixels = 0
         pre_height = 0
-        new_height = 0           
+        new_height = 0
         
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
@@ -136,61 +136,49 @@ class Whatsapp(webdriver.Chrome):
         self.wait(5)
         chats = self.getContacts()
         
-        contactFound = self.searchContactToClick(chats, contactName)
+        contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
         
-        if(contactFound == True):
-            print('Contatto trovato senza scrollare \n')
-        
-        endAll = False
-        
-        if(contactFound == False):
-            while True:
-                pixels += 500
-                time.sleep(0.5)
-                self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
-                new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
+        for contactName in contactNamesFromCSV:
             
+            contactFound = self.searchContactToClick(chats, contactName)
+            
+            if(contactFound):
+                print('Contatto trovato senza scrollare \n')
+            else:
+                
                 while True:
-    
-                    try:
-                        self.implicitly_wait(200)
-                        self.wait(5)
-                        scrolledChats = self.getContacts()
-                        
-                        contactFoundInScrolledChats = self.searchContactToClick(scrolledChats, contactName)
-                        
-                        if(contactFoundInScrolledChats):
-                            print('Contatto trovato \n')
-                            endAll = True
-                            break
-                        
-                        namesAfterScrolling = self.fillNameList(scrolledChats)
-                        
-                        break
+                    pixels += 500
+                    time.sleep(0.5)
+                    self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
+                    new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
+                    
+                    while True:
+                        try:
+                            self.implicitly_wait(200)
+                            self.wait(5)
+                            scrolledChats = self.getContacts()
+                    
+                            contactFoundInScrolledChats = self.searchContactToClick(scrolledChats, contactName)
                             
-                    except:
-                        self.implicitly_wait(0.5)
-            
-                if(endAll):
-                    break
-            
-                if(pre_height < new_height):
-                    pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-                else:
-                    break
+                            if(contactFoundInScrolledChats):
+                                print('Contatto trovato \n')
+                                endAll = True
+                                break
+                            
+                            break
+                        except:
+                            self.implicitly_wait(0.5)
+                            
+                    if(endAll):
+                        break
+                    
+                    if(pre_height < new_height):
+                        pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
+                    else:
+                        break
+
         
     
     def readContactsFromFile(self, pathToFile):
         contacts = pd.read_csv(pathToFile)
-        print(len(contacts['Nome'].values))
-        
-    # def readContactsByFile(self, pathToFile):
-    #     excel_document = openpyxl.load_workbook(pathToFile)
-    #     print(type(excel_document))
-    #     sheet = excel_document.get_sheet_by_name('Foglio1')
-        
-    #     multiple_cells = sheet['A1':'B4']
-    #     for row in multiple_cells:
-    #         for cell in row:
-    #             print(cell.value)
-        
+        return contacts['Nome'].values

@@ -9,9 +9,9 @@ from whatsapp.whatsapp import Whatsapp
 from app import App
 
 # THIS IS THE FILE TO BE RUN ONCE MVC ARCHITECTURE IS DEFINED
-app = App()
-app.mainloop()
+# app = App()
+# app.mainloop()
 
 
-# inst = Whatsapp()
-# inst.landFirstPage()
+inst = Whatsapp()
+inst.getChatOfContact()

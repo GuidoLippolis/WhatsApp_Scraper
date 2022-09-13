@@ -70,7 +70,7 @@ class Whatsapp(webdriver.Chrome):
         return nameList
     
     
-    
+    # Scraps chats of single contact
     def getChatOfContact(self):
         
         endAll = False

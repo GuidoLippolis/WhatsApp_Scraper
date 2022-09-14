@@ -79,6 +79,15 @@ class Whatsapp(webdriver.Chrome):
             print(message.get_dom_attribute('innerHTML'))
             print('\n')
         
+        emojis = self.find_elements(by=By.CSS_SELECTOR, value="img[data-plain-text][crossorigin='anonymous']")
+        
+        
+        # for emoji in emojis:
+        #     print('Sto stampando le emoticons \n')
+        #     print(emoji.get_attribute('alt'))
+            
+        
+        
     
     
     # Scraps chats of single contact
@@ -136,7 +145,7 @@ class Whatsapp(webdriver.Chrome):
                             print('Contact found = ' + str(contactFoundInScrolledChats))
                             
                             if(contactFoundInScrolledChats):
-                                print('Contatto trovato \n')
+                                print('Contatto trovato allo scroll n. \n' + str(nScrolls) + '! \n')
                                 endAll = True
                                 break
                             

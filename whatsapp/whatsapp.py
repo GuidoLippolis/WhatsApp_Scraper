@@ -70,6 +70,17 @@ class Whatsapp(webdriver.Chrome):
         return nameList
     
     
+    def getConversation(self, contactName):
+        self.implicitly_wait(150)
+        chatContainer = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
+        messages = chatContainer.find_elements(by=By.XPATH, value='//span[@dir=' + '"ltr"' + ']//span')
+        
+        for message in messages:
+            print(message.get_dom_attribute('innerHTML'))
+            print('\n')
+        
+    
+    
     # Scraps chats of single contact
     def getChatOfContact(self):
         
@@ -99,6 +110,7 @@ class Whatsapp(webdriver.Chrome):
             
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
+                self.getConversation(contactName)
             else:
                 
                 while True:

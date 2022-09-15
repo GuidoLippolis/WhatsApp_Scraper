@@ -6,6 +6,8 @@ Created on Sun Sep  4 12:10:34 2022
 
 import time
 
+import os
+
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -93,6 +95,8 @@ class Whatsapp(webdriver.Chrome):
             
             print('Cercando ' + contactName + '... \n')
             
+            os.mkdir(contactName)
+            
             contactFound = self.searchContactToClick(chats, contactName)
             
             if(contactFound):
@@ -148,6 +152,9 @@ class Whatsapp(webdriver.Chrome):
     
     
     def getConversation(self, contactName):
+        
+        DataFrame = self.createCSV(contactName)
+        
         messageContainer = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
         for messages in messageContainer:
             
@@ -171,11 +178,12 @@ class Whatsapp(webdriver.Chrome):
                 finalMessage = temp
             else:
                 finalMessage = message
-        print(finalMessage)
+                
+
         
+    def createCSV(self, contactName):
         
-        
-    def createCSV(self):
         data = []
-        df = pd.DataFrame(data, columns=HEADER)
-        df.to_csv("scraped_messages.csv", index=False, sep=";")
+        DataFrame = pd.DataFrame(data, columns=HEADER)
+        DataFrame.to_csv(contactName + "/" + contactName + ".csv", index=False, sep=";")
+        return DataFrame

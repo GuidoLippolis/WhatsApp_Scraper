@@ -30,4 +30,4 @@ XPATH_EMOJIS = ".//img[contains(@class,'selectable-text copyable-text')]"
 XPATH_SENDER = ".//div[contains(@data-pre-plain-text,'[')]"
 
 # Header of CSV file containing scraped messages
-HEADER = ["Mittente", "Messaggio", "Orario"]
+HEADER = ["Data", "Ora", "Mittente", "Messaggio"]

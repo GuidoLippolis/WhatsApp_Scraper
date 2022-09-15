@@ -4,8 +4,6 @@ Created on Sun Sep  4 12:10:34 2022
 @author: guido
 """
 
-import time
-
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -26,21 +24,15 @@ class Whatsapp(webdriver.Chrome):
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
         self.driver_path = driver_path
         super(Whatsapp, self).__init__()
-
-    
-    # Returns the list of <span> tags contained in 'recentList' main div
+        
+        
+        
     def getContacts(self):
         self.implicitly_wait(150)
         recentList = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
         return recentList.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
-        
     
-    # Stops the program for the given number of seconds
-    def wait(self, seconds):
-        for i in range(0,seconds):
-            time.sleep(1)
-
-
+    
     
     def waitForElementToAppear(self, seconds, XPath):
         WebDriverWait(self, seconds).until(
@@ -48,7 +40,7 @@ class Whatsapp(webdriver.Chrome):
         )
         
         
-    
+        
     def searchContactToClick(self, contacts, contactToSearch):
         for contact in contacts:
             self.wait(1)
@@ -57,9 +49,9 @@ class Whatsapp(webdriver.Chrome):
                 if(name == contactToSearch):
                     contact.click()
                     return True
-    
-    
-    
+                
+                
+                
     def fillNameList(self, spanList):
         nameList = []
         self.implicitly_wait(60)
@@ -70,30 +62,11 @@ class Whatsapp(webdriver.Chrome):
         return nameList
     
     
-    def getConversation(self, contactName):
-        self.implicitly_wait(150)
-        chatContainer = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
-        messages = chatContainer.find_elements(by=By.XPATH, value='//span[@dir=' + '"ltr"' + ']//span')
-        
-        for message in messages:
-            print(message.get_dom_attribute('innerHTML'))
-            print('\n')
-        
-        emojis = self.find_elements(by=By.CSS_SELECTOR, value="img[data-plain-text][crossorigin='anonymous']")
-        
-        
-        # for emoji in emojis:
-        #     print('Sto stampando le emoticons \n')
-        #     print(emoji.get_attribute('alt'))
-            
-        
-        
     
-    
-    # Scraps chats of single contact
-    def getChatOfContact(self):
+    def findChatToScrap(self):
         
-        endAll = False
+        endOfSearch = False
+        
         pixels = 0
         pre_height = 0
         new_height = 0
@@ -119,7 +92,6 @@ class Whatsapp(webdriver.Chrome):
             
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
-                self.getConversation(contactName)
             else:
                 
                 while True:
@@ -145,24 +117,36 @@ class Whatsapp(webdriver.Chrome):
                             print('Contact found = ' + str(contactFoundInScrolledChats))
                             
                             if(contactFoundInScrolledChats):
-                                print('Contatto trovato allo scroll n. \n' + str(nScrolls) + '! \n')
-                                endAll = True
+                                print('Contatto trovato \n')
+                                endOfSearch = True
                                 break
                             
                             break
                         except:
                             self.implicitly_wait(0.5)
                             
-                    if(endAll):
+                    if(endOfSearch):
                         break
                     
                     if(pre_height < new_height):
                         pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
                     else:
                         break
-
-        
-    
+                    
+                    
+                    
     def readContactsFromFile(self, pathToFile):
         contacts = pd.read_csv(pathToFile)
         return contacts['Nome'].values
+    
+    
+    
+    def getConversation(self, contactName):
+        # self.implicitly_wait(150)
+        chatContainer = self.find_element(by=By.XPATH, value=CHAT_MESSAGES_CONTAINER)
+        messages = chatContainer.find_elements(by=By.XPATH, value='//span[@dir=' + '"ltr"' + ']//span')
+        
+        
+        # for emoji in emojis:
+        #     print('Sto stampando le emoticons \n')
+        #     print(emoji.get_attribute('alt'))

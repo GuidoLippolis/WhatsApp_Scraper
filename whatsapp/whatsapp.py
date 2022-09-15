@@ -8,6 +8,8 @@ import time
 
 import os
 
+import csv
+
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -96,7 +98,8 @@ class Whatsapp(webdriver.Chrome):
             
             print('Cercando ' + contactName + '... \n')
             
-            os.mkdir(contactName)
+            if not os.path.exists(contactName):
+                os.mkdir(contactName)
             
             contactFound = self.searchContactToClick(chats, contactName)
             
@@ -210,4 +213,4 @@ class Whatsapp(webdriver.Chrome):
     def makeCSV(self, data, contactName):
         print('\n Writing new data to csv...')
         newDataFrame = pd.DataFrame([data], columns=HEADER)
-        newDataFrame.to_csv(contactName + "/" + contactName + ".csv", mode='a', index=False, sep=";")
+        newDataFrame.to_csv(contactName + "/" + contactName + ".csv", mode='a', index=False, header=False, sep=";")

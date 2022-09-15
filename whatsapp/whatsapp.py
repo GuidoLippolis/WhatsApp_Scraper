@@ -154,13 +154,9 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, contactName):
         
-        self.createCSV(contactName)
-        i = 0
-        messageContainer = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
-        for messages in messageContainer:
-            
-            i += 1
-            print('Messaggio n. ' + str(i) + ' ...')
+        messagesContainers = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
+        
+        for messages in messagesContainers:
             
             finalMessage = ""
             temp = ""
@@ -182,6 +178,9 @@ class Whatsapp(webdriver.Chrome):
             
             senderName = self.getSender(senderAndHour)
             hourString = self.getHour(senderAndHour)
+            dateString = self.getDate(senderAndHour)
+            
+            self.makeCSV([dateString, hourString, senderName, message], contactName)
             
             if(len(emojis) != 0):
                 for emoji in emojis:
@@ -193,13 +192,6 @@ class Whatsapp(webdriver.Chrome):
 
 
         
-    def createCSV(self, contactName):
-        data = []
-        DataFrame = pd.DataFrame(data, columns=HEADER)
-        DataFrame.to_csv(contactName + "/" + contactName + ".csv", index=False, sep=";")
-        
-        
-        
     def getSender(self, senderAndHour):
         return (senderAndHour.split("] ")[1]).split(":")[0]
     
@@ -207,3 +199,15 @@ class Whatsapp(webdriver.Chrome):
     
     def getHour(self, senderAndHour):
         return (senderAndHour.split("[")[1]).split(",")[0]
+    
+    
+    
+    def getDate(self, senderAndHour):
+        return (senderAndHour.split(", ")[1]).split("]")[0]
+    
+    
+    
+    def makeCSV(self, data, contactName):
+        print('\n Writing new data to csv...')
+        newDataFrame = pd.DataFrame([data], columns=HEADER)
+        newDataFrame.to_csv(contactName + "/" + contactName + ".csv", mode='a', index=False, sep=";")

@@ -11,8 +11,8 @@ BASE_URL = "https://web.whatsapp.com/"
 # Container of all open chats in the home page
 CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'
 
-# Container of all messages of a single chat
-CHAT_MESSAGES_CONTAINER = '/html/body/div[1]/div/div/div[4]/div/div[3]/div/div[2]/div[3]'
+# Containers of all messages of a single chat
+CHAT_MESSAGES_CONTAINERS = "//div[contains(@class,'message-')]"
 
 # HTML id value of CHAT_MESSAGES_CONTAINER
 CHAT_SECTION_HTML_ID = 'pane-side'

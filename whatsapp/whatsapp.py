@@ -4,6 +4,8 @@ Created on Sun Sep  4 12:10:34 2022
 @author: guido
 """
 
+import time
+
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -15,7 +17,7 @@ from whatsapp.constants import BASE_URL
 from whatsapp.constants import CHAT_LIST_CONTAINER
 from whatsapp.constants import ARCHIVED_CHATS_BUTTON
 from whatsapp.constants import CHAT_SECTION_HTML_ID
-from whatsapp.constants import CHAT_MESSAGES_CONTAINER
+from whatsapp.constants import CHAT_MESSAGES_CONTAINERS
 
 import pandas as pd
 
@@ -43,7 +45,7 @@ class Whatsapp(webdriver.Chrome):
         
     def searchContactToClick(self, contacts, contactToSearch):
         for contact in contacts:
-            self.wait(1)
+            time.sleep(1)
             name = contact.get_attribute('title')
             if(len(name) != 0):
                 if(name == contactToSearch):
@@ -75,7 +77,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
         
-        self.wait(1)
+        time.sleep(1)
         chats = self.getContacts()
         
         print('Prima di scrollare erano presenti: \n')
@@ -92,6 +94,7 @@ class Whatsapp(webdriver.Chrome):
             
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
+                self.getConversation(contactName)
             else:
                 
                 while True:
@@ -104,7 +107,7 @@ class Whatsapp(webdriver.Chrome):
                     while True:
                         try:
                             self.implicitly_wait(200)
-                            self.wait(1)
+                            time.sleep(1)
                             scrolledChats = self.getContacts()
                             
                             scrolledChatsAsStrings = self.fillNameList(scrolledChats)
@@ -142,11 +145,27 @@ class Whatsapp(webdriver.Chrome):
     
     
     def getConversation(self, contactName):
-        # self.implicitly_wait(150)
-        chatContainer = self.find_element(by=By.XPATH, value=CHAT_MESSAGES_CONTAINER)
-        messages = chatContainer.find_elements(by=By.XPATH, value='//span[@dir=' + '"ltr"' + ']//span')
-        
-        
-        # for emoji in emojis:
-        #     print('Sto stampando le emoticons \n')
-        #     print(emoji.get_attribute('alt'))
+        messageContainer = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
+        for messages in messageContainer:
+            
+            finalMessage = ""
+            temp = ""
+            
+            message = messages.find_element(
+                by=By.XPATH,
+                value=".//span[contains(@class,'selectable-text copyable-text')]"
+            ).text
+            
+            emojis = messages.find_elements(
+                by=By.XPATH,
+                value=".//img[contains(@class,'selectable-text copyable-text')]"
+            )
+            
+            if(len(emojis) != 0):
+                for emoji in emojis:
+                    message = message + emoji.get_attribute("data-plain-text")
+                    temp += message
+                finalMessage = temp
+            else:
+                finalMessage = message
+        print(finalMessage)

@@ -19,3 +19,15 @@ CHAT_SECTION_HTML_ID = 'pane-side'
 
 # Button to get archived chats
 ARCHIVED_CHATS_BUTTON = '//*[@id="pane-side"]/button/div/div[2]/div/div'
+
+# XPath for querying text messages without emojis
+XPATH_TEXT_MESSAGES = ".//span[contains(@class,'selectable-text copyable-text')]"
+
+# XPath for querying emojis
+XPATH_EMOJIS = ".//img[contains(@class,'selectable-text copyable-text')]"
+
+# XPath of message sender
+XPATH_SENDER = ".//div[contains(@data-pre-plain-text,'[')]"
+
+# Header of CSV file containing scraped messages
+HEADER = ["Mittente", "Messaggio", "Orario"]

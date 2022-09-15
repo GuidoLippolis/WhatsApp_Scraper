@@ -18,6 +18,9 @@ from whatsapp.constants import CHAT_LIST_CONTAINER
 from whatsapp.constants import ARCHIVED_CHATS_BUTTON
 from whatsapp.constants import CHAT_SECTION_HTML_ID
 from whatsapp.constants import CHAT_MESSAGES_CONTAINERS
+from whatsapp.constants import XPATH_TEXT_MESSAGES
+from whatsapp.constants import XPATH_EMOJIS
+from whatsapp.constants import HEADER
 
 import pandas as pd
 
@@ -153,12 +156,12 @@ class Whatsapp(webdriver.Chrome):
             
             message = messages.find_element(
                 by=By.XPATH,
-                value=".//span[contains(@class,'selectable-text copyable-text')]"
+                value=XPATH_TEXT_MESSAGES
             ).text
             
             emojis = messages.find_elements(
                 by=By.XPATH,
-                value=".//img[contains(@class,'selectable-text copyable-text')]"
+                value=XPATH_EMOJIS
             )
             
             if(len(emojis) != 0):
@@ -169,3 +172,10 @@ class Whatsapp(webdriver.Chrome):
             else:
                 finalMessage = message
         print(finalMessage)
+        
+        
+        
+    def createCSV(self):
+        data = []
+        df = pd.DataFrame(data, columns=HEADER)
+        df.to_csv("scraped_messages.csv", index=False, sep=";")

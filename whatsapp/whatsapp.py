@@ -23,6 +23,7 @@ from whatsapp.constants import CHAT_MESSAGES_CONTAINERS
 from whatsapp.constants import XPATH_TEXT_MESSAGES
 from whatsapp.constants import XPATH_EMOJIS
 from whatsapp.constants import HEADER
+from whatsapp.constants import XPATH_SENDER
 
 import pandas as pd
 
@@ -153,10 +154,13 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, contactName):
         
-        DataFrame = self.createCSV(contactName)
-        
+        self.createCSV(contactName)
+        i = 0
         messageContainer = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
         for messages in messageContainer:
+            
+            i += 1
+            print('Messaggio n. ' + str(i) + ' ...')
             
             finalMessage = ""
             temp = ""
@@ -171,6 +175,14 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_EMOJIS
             )
             
+            senderAndHour = messages.find_element(
+                by=By.XPATH,
+                value=XPATH_SENDER
+            ).get_attribute("data-pre-plain-text")
+            
+            senderName = self.getSender(senderAndHour)
+            hourString = self.getHour(senderAndHour)
+            
             if(len(emojis) != 0):
                 for emoji in emojis:
                     message = message + emoji.get_attribute("data-plain-text")
@@ -178,12 +190,20 @@ class Whatsapp(webdriver.Chrome):
                 finalMessage = temp
             else:
                 finalMessage = message
-                
+
 
         
     def createCSV(self, contactName):
-        
         data = []
         DataFrame = pd.DataFrame(data, columns=HEADER)
         DataFrame.to_csv(contactName + "/" + contactName + ".csv", index=False, sep=";")
-        return DataFrame
+        
+        
+        
+    def getSender(self, senderAndHour):
+        return (senderAndHour.split("] ")[1]).split(":")[0]
+    
+    
+    
+    def getHour(self, senderAndHour):
+        return (senderAndHour.split("[")[1]).split(",")[0]

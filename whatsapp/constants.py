@@ -31,3 +31,9 @@ XPATH_SENDER = ".//div[contains(@data-pre-plain-text,'[')]"
 
 # Header of CSV file containing scraped messages
 HEADER = ["Data", "Ora", "Mittente", "Messaggio"]
+
+# Name of the directory containing scraped chats
+SCRAPING_DIRECTORY_NAME = "Scraped"
+
+# Timestamp format for directory names
+TIMESTAMP_FORMAT = "%H:%M:%S%f"

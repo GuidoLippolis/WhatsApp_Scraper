@@ -6,6 +6,8 @@ Created on Sun Sep  4 12:10:34 2022
 
 import time
 
+from datetime import datetime
+
 import os
 
 import csv
@@ -26,6 +28,8 @@ from whatsapp.constants import XPATH_TEXT_MESSAGES
 from whatsapp.constants import XPATH_EMOJIS
 from whatsapp.constants import HEADER
 from whatsapp.constants import XPATH_SENDER
+from whatsapp.constants import SCRAPING_DIRECTORY_NAME
+from whatsapp.constants import TIMESTAMP_FORMAT
 
 import pandas as pd
 
@@ -75,6 +79,11 @@ class Whatsapp(webdriver.Chrome):
     
     def findChatToScrap(self):
         
+        timestamp = self.getTimeStamp();
+        os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        
+        print("Ho creato la cartella: " + SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        
         endOfSearch = False
         
         pixels = 0
@@ -98,14 +107,12 @@ class Whatsapp(webdriver.Chrome):
             
             print('Cercando ' + contactName + '... \n')
             
-            if not os.path.exists(contactName):
-                os.mkdir(contactName)
-            
             contactFound = self.searchContactToClick(chats, contactName)
             
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
-                self.getConversation(contactName)
+                path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                self.getConversation(path, contactName)
             else:
                 
                 while True:
@@ -155,11 +162,18 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def getConversation(self, contactName):
-        
+    def getConversation(self, pathToCSV, contactName):
+
+        currentWorkingDirectory = os.getcwd()
+
         messagesContainers = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
         
         for messages in messagesContainers:
+            
+            print('Prossimo messaggio: sono nella cartella ')
+            print(currentWorkingDirectory)
+            
+            os.chdir(currentWorkingDirectory)
             
             finalMessage = ""
             temp = ""
@@ -169,29 +183,29 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_TEXT_MESSAGES
             ).text
             
-            emojis = messages.find_elements(
-                by=By.XPATH,
-                value=XPATH_EMOJIS
-            )
+            # emojis = messages.find_elements(
+            #     by=By.XPATH,
+            #     value=XPATH_EMOJIS
+            # )
             
             senderAndHour = messages.find_element(
                 by=By.XPATH,
                 value=XPATH_SENDER
             ).get_attribute("data-pre-plain-text")
-            
+
             senderName = self.getSender(senderAndHour)
             hourString = self.getHour(senderAndHour)
             dateString = self.getDate(senderAndHour)
             
-            self.makeCSV([dateString, hourString, senderName, message], contactName)
+            self.makeCSV([dateString, hourString, senderName, message], pathToCSV, contactName)
             
-            if(len(emojis) != 0):
-                for emoji in emojis:
-                    message = message + emoji.get_attribute("data-plain-text")
-                    temp += message
-                finalMessage = temp
-            else:
-                finalMessage = message
+            # if(len(emojis) != 0):
+            #     for emoji in emojis:
+            #         message = message + emoji.get_attribute("data-plain-text")
+            #         temp += message
+            #     finalMessage = temp
+            # else:
+            #     finalMessage = message
 
 
         
@@ -208,9 +222,24 @@ class Whatsapp(webdriver.Chrome):
     def getDate(self, senderAndHour):
         return (senderAndHour.split(", ")[1]).split("]")[0]
     
+
     
-    
-    def makeCSV(self, data, contactName):
-        print('\n Writing new data to csv...')
-        newDataFrame = pd.DataFrame([data], columns=HEADER)
-        newDataFrame.to_csv(contactName + "/" + contactName + ".csv", mode='a', index=False, header=False, sep=";")
+    def makeCSV(self, data, pathToCSV, contactName):
+        
+        os.chdir(os.getcwd())
+        os.chdir(pathToCSV)
+        if not os.path.exists(contactName):
+            os.mkdir(contactName)
+        os.chdir(contactName)
+        
+        if not os.path.exists(contactName + ".csv"):
+            newDataFrame = pd.DataFrame([data], columns=HEADER)
+            newDataFrame.to_csv(contactName + ".csv", mode='a', index=False, header=True, sep=";")
+        else:
+            newDataFrame = pd.DataFrame([data], columns=HEADER)
+            newDataFrame.to_csv(contactName + ".csv", mode='a', index=False, header=False, sep=";")
+        
+        
+        
+    def getTimeStamp(self):
+        return ((datetime.now()).strftime(TIMESTAMP_FORMAT)).replace(":","")

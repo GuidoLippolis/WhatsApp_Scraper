@@ -10,8 +10,6 @@ from datetime import datetime
 
 import os
 
-import csv
-
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -183,10 +181,10 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_TEXT_MESSAGES
             ).text
             
-            # emojis = messages.find_elements(
-            #     by=By.XPATH,
-            #     value=XPATH_EMOJIS
-            # )
+            emojis = messages.find_elements(
+                by=By.XPATH,
+                value=XPATH_EMOJIS
+            )
             
             senderAndHour = messages.find_element(
                 by=By.XPATH,
@@ -199,13 +197,13 @@ class Whatsapp(webdriver.Chrome):
             
             self.makeCSV([dateString, hourString, senderName, message], pathToCSV, contactName)
             
-            # if(len(emojis) != 0):
-            #     for emoji in emojis:
-            #         message = message + emoji.get_attribute("data-plain-text")
-            #         temp += message
-            #     finalMessage = temp
-            # else:
-            #     finalMessage = message
+            if(len(emojis) != 0):
+                for emoji in emojis:
+                    message = message + emoji.get_attribute("data-plain-text")
+                    temp += message
+                finalMessage = temp
+            else:
+                finalMessage = message
 
 
         

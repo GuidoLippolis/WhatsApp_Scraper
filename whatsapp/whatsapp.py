@@ -168,6 +168,8 @@ class Whatsapp(webdriver.Chrome):
         
         for messages in messagesContainers:
             
+            dataToAppend = []
+            
             print('Prossimo messaggio: sono nella cartella ')
             print(currentWorkingDirectory)
             
@@ -191,11 +193,14 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_SENDER
             ).get_attribute("data-pre-plain-text")
 
-            senderName = self.getSender(senderAndHour)
-            hourString = self.getHour(senderAndHour)
-            dateString = self.getDate(senderAndHour)
-            
-            self.makeCSV([dateString, hourString, senderName, message], pathToCSV, contactName)
+            dataToAppend.append([
+                self.getSender(senderAndHour),
+                self.getHour(senderAndHour),
+                self.getDate(senderAndHour),
+                message
+            ])
+
+            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
             
             if(len(emojis) != 0):
                 for emoji in emojis:

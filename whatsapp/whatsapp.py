@@ -32,6 +32,8 @@ from whatsapp.constants import DIRECTORY_CALLBACK
 
 import pandas as pd
 
+import base64
+
 class Whatsapp(webdriver.Chrome):
     
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
@@ -110,6 +112,7 @@ class Whatsapp(webdriver.Chrome):
             
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
+                self.downloadImageTest()
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                 self.getConversation(path, contactName)
             else:
@@ -247,3 +250,30 @@ class Whatsapp(webdriver.Chrome):
         
     def getTimeStamp(self):
         return ((datetime.now()).strftime(TIMESTAMP_FORMAT)).replace(":","")
+    
+    
+    
+    def downloadImageTest(self):
+        image_xpath = '/html/body/div[1]/div/div/div[4]/div/div[3]/div/div[2]/div[3]/div[7]/div/div[1]/div[1]/div/div[2]/div[1]/div[2]/img'
+        image = WebDriverWait(self,40).until(lambda driver: self.find_element(by=By.XPATH, value=image_xpath))
+        image_src = image.get_attribute("src")
+        i = 1
+        result = self.execute_async_script("""
+            var uri = arguments[0];
+            var callback = arguments[1];
+            var toBase64 = function(buffer){for(var r,n=new Uint8Array(buffer),t=n.length,a=new Uint8Array(4*Math.ceil(t/3)),i=new Uint8Array(64),o=0,c=0;64>c;++c)i[c]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(c);for(c=0;t-t%3>c;c+=3,o+=4)r=n[c]<<16|n[c+1]<<8|n[c+2],a[o]=i[r>>18],a[o+1]=i[r>>12&63],a[o+2]=i[r>>6&63],a[o+3]=i[63&r];return t%3===1?(r=n[t-1],a[o]=i[r>>2],a[o+1]=i[r<<4&63],a[o+2]=61,a[o+3]=61):t%3===2&&(r=(n[t-2]<<8)+n[t-1],a[o]=i[r>>10],a[o+1]=i[r>>4&63],a[o+2]=i[r<<2&63],a[o+3]=61),new TextDecoder("ascii").decode(a)};
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'arraybuffer';
+            xhr.onload = function(){ callback(toBase64(xhr.response)) };
+            xhr.onerror = function(){ callback(xhr.status) };
+            xhr.open('GET', uri);
+            xhr.send();
+            """, image_src)
+            
+        if(type(result) == int):
+            raise Exception("Request failed with status %s" % result)
+        final_image = base64.b64decode(result)
+        filename = 'images'+str(i)+'.jpg'
+        with open(filename, 'wb') as f:
+            f.write(final_image)
+            print("Saving "+filename+", Go To The Next Image")

@@ -37,3 +37,6 @@ SCRAPING_DIRECTORY_NAME = "Scraped"
 
 # Timestamp format for directory names
 TIMESTAMP_FORMAT = "%H:%M:%S%f"
+
+# Folder to go back for every message
+DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"

@@ -28,6 +28,7 @@ from whatsapp.constants import HEADER
 from whatsapp.constants import XPATH_SENDER
 from whatsapp.constants import SCRAPING_DIRECTORY_NAME
 from whatsapp.constants import TIMESTAMP_FORMAT
+from whatsapp.constants import DIRECTORY_CALLBACK
 
 import pandas as pd
 
@@ -162,7 +163,7 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName):
 
-        currentWorkingDirectory = os.getcwd()
+        currentWorkingDirectory = DIRECTORY_CALLBACK        
 
         messagesContainers = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
         
@@ -194,9 +195,9 @@ class Whatsapp(webdriver.Chrome):
             ).get_attribute("data-pre-plain-text")
 
             dataToAppend.append([
-                self.getSender(senderAndHour),
-                self.getHour(senderAndHour),
                 self.getDate(senderAndHour),
+                self.getHour(senderAndHour),
+                self.getSender(senderAndHour),
                 message
             ])
 

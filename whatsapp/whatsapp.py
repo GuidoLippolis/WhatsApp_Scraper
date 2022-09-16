@@ -160,7 +160,7 @@ class Whatsapp(webdriver.Chrome):
         return contacts['Nome'].values
     
     
-    # Test
+    
     def getConversation(self, pathToCSV, contactName):
 
         currentWorkingDirectory = DIRECTORY_CALLBACK        

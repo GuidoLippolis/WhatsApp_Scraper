@@ -40,3 +40,6 @@ TIMESTAMP_FORMAT = "%H:%M:%S%f"
 
 # Folder to go back for every message
 DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
+
+# Number of pixels to scroll
+PIXELS_TO_SCROLL = 300

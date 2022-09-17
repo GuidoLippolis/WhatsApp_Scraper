@@ -167,6 +167,8 @@ class Whatsapp(webdriver.Chrome):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     self.getConversation(path, contactName)
                     
+                    
+                    
     def readContactsFromFile(self, pathToFile):
         contacts = pd.read_csv(pathToFile)
         return contacts['Nome'].values

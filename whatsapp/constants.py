@@ -43,3 +43,6 @@ DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
 
 # Number of pixels to scroll
 PIXELS_TO_SCROLL = 300
+
+# Messages panel data-testid value
+MESSAGES_PANEL_DATATESTID = ' "conversation-panel-messages" '

@@ -30,6 +30,7 @@ from whatsapp.constants import SCRAPING_DIRECTORY_NAME
 from whatsapp.constants import TIMESTAMP_FORMAT
 from whatsapp.constants import DIRECTORY_CALLBACK
 from whatsapp.constants import PIXELS_TO_SCROLL
+from whatsapp.constants import MESSAGES_PANEL_DATATESTID
 
 import pandas as pd
 
@@ -116,9 +117,9 @@ class Whatsapp(webdriver.Chrome):
             
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
-                self.downloadImageTest()
+                self.downloadVideos()
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                self.getConversation(path, contactName)
+                # self.getConversation(path, contactName)
             else:
                 
                 while True:
@@ -148,6 +149,7 @@ class Whatsapp(webdriver.Chrome):
                             
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
+                                self.downloadVideos()
                                 endOfSearch = True
                                 break
                             
@@ -165,7 +167,7 @@ class Whatsapp(webdriver.Chrome):
                     
                 if(endOfSearch):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                    self.getConversation(path, contactName)
+                    # self.getConversation(path, contactName)
                     
                     
                     
@@ -264,53 +266,31 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    # def downloadImageTest(self):
-    #     image_xpath = '/html/body/div[1]/div/div/div[4]/div/div[3]/div/div[2]/div[3]/div[7]/div/div[1]/div[1]/div/div[2]/div[1]/div[2]/img'
-    #     image = WebDriverWait(self,40).until(lambda driver: self.find_element(by=By.XPATH, value=image_xpath))
-    #     image_src = image.get_attribute("src")
-    #     i = 1
-    #     result = self.execute_async_script("""
-    #         var uri = arguments[0];
-    #         var callback = arguments[1];
-    #         var toBase64 = function(buffer){for(var r,n=new Uint8Array(buffer),t=n.length,a=new Uint8Array(4*Math.ceil(t/3)),i=new Uint8Array(64),o=0,c=0;64>c;++c)i[c]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(c);for(c=0;t-t%3>c;c+=3,o+=4)r=n[c]<<16|n[c+1]<<8|n[c+2],a[o]=i[r>>18],a[o+1]=i[r>>12&63],a[o+2]=i[r>>6&63],a[o+3]=i[63&r];return t%3===1?(r=n[t-1],a[o]=i[r>>2],a[o+1]=i[r<<4&63],a[o+2]=61,a[o+3]=61):t%3===2&&(r=(n[t-2]<<8)+n[t-1],a[o]=i[r>>10],a[o+1]=i[r>>4&63],a[o+2]=i[r<<2&63],a[o+3]=61),new TextDecoder("ascii").decode(a)};
-    #         var xhr = new XMLHttpRequest();
-    #         xhr.responseType = 'arraybuffer';
-    #         xhr.onload = function(){ callback(toBase64(xhr.response)) };
-    #         xhr.onerror = function(){ callback(xhr.status) };
-    #         xhr.open('GET', uri);
-    #         xhr.send();
-    #         """, image_src)
-            
-    #     if(type(result) == int):
-    #         raise Exception("Request failed with status %s" % result)
-    #     final_image = base64.b64decode(result)
-    #     filename = 'images'+str(i)+'.jpg'
-    #     with open(filename, 'wb') as f:
-    #         f.write(final_image)
-    #         print("Saving "+filename+", Go To The Next Image")
-    
-    
-    
-    # def downloadImageTest(self):
-    #     image_xpath = '//*[@id="main"]/div[3]/div/div[2]/div[2]/div[7]/div/div[1]/div[1]/div/div[2]/div[1]/div[2]/img'
-    #     img = WebDriverWait(self,40).until(lambda driver: self.find_element(by=By.XPATH, value=image_xpath))
-    #     img = self.find_element(by=By.XPATH, value=image_xpath)
-    #     src = img.get_attribute('src')
-    #     filename = "image.jpg"
-    #     response = requests.get("https://web.whatsapp.com/4d4c8ef3-37eb-4011-aa4a-deb89b9bba1f", stream=True)
-    #     if(response.status_code == 200):
-    #         response.raw.decode_content = True
-    #         with open(filename + ".jpg", "wb") as f:
-    #             shutil.copyfileobj(response.raw, f)
-    #         print("Image successfully downloaded!")
-    #     else:
-    #         print("Image cannot be downloaded... damn!")
-    
-    
-    
     def updateList(self, firstList, secondList):
         updatedList = []
         for e in secondList:
             if e not in firstList:
                 updatedList.append(e)
         return updatedList
+    
+    
+    
+    def downloadVideos(self):
+        # Scroll to the top of the chat
+        
+        nScrolls = 0
+        pixels = 0
+        pre_height = 0
+        new_height = 0
+        
+        while True:
+            pixels += PIXELS_TO_SCROLL
+            scrollToScript = "(document.querySelectorAll('[data-testid=" + MESSAGES_PANEL_DATATESTID + "]'))[0].scrollTo(0,-1000)"
+            scrollTopScript = "return (document.querySelectorAll('[data-testid=" + MESSAGES_PANEL_DATATESTID + "]'))[0].scrollTop"
+            self.execute_script(scrollToScript)
+            new_height = self.execute_script(scrollTopScript)
+        
+            if(pre_height < new_height):
+                pre_height = self.execute_script(scrollTopScript)
+            else:
+                break

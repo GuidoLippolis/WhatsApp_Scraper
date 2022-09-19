@@ -12,7 +12,8 @@ BASE_URL = "https://web.whatsapp.com/"
 CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'
 
 # Containers of all messages of a single chat
-CHAT_MESSAGES_CONTAINERS = "//div[contains(@class,'message-')]"
+# CHAT_MESSAGES_CONTAINERS = "//div[contains(@class,'message-')]"
+CHAT_MESSAGES_CONTAINERS = "//div//span[contains(@dir,'ltr') and contains(@class,'i0jNr selectable-text copyable-text')]"
 
 # HTML id value of CHAT_MESSAGES_CONTAINER
 CHAT_SECTION_HTML_ID = 'pane-side'
@@ -21,7 +22,7 @@ CHAT_SECTION_HTML_ID = 'pane-side'
 ARCHIVED_CHATS_BUTTON = '//*[@id="pane-side"]/button/div/div[2]/div/div'
 
 # XPath for querying text messages without emojis
-XPATH_TEXT_MESSAGES = ".//span[contains(@class,'selectable-text copyable-text')]"
+XPATH_TEXT_MESSAGES = "//div[contains(@data-testid,'msg-container') and contains(@class,'_1-lf9 _3mSPV')]"
 
 # XPath for querying emojis
 XPATH_EMOJIS = ".//img[contains(@class,'selectable-text copyable-text')]"
@@ -48,7 +49,7 @@ PIXELS_TO_SCROLL = 300
 # MESSAGES_PANEL_DATATESTID = ' "conversation-panel-messages" '
 
 # XPath identifier for video play button
-VIDEO_PLAY_BUTTON_XPATH = "//span[contains(@data-testid, 'media-play')]"
+VIDEO_PLAY_BUTTON_XPATH = "//div//span[contains(@data-testid,'media-play')]"
 
 # XPath identifier for video download button
 VIDEO_DOWNLOAD_BUTTON_XPATH = "//span[contains(@data-testid, 'download')]"

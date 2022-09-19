@@ -30,14 +30,13 @@ from whatsapp.constants import SCRAPING_DIRECTORY_NAME
 from whatsapp.constants import TIMESTAMP_FORMAT
 from whatsapp.constants import DIRECTORY_CALLBACK
 from whatsapp.constants import PIXELS_TO_SCROLL
-from whatsapp.constants import MESSAGES_PANEL_DATATESTID
+from whatsapp.constants import VIDEO_PLAY_BUTTON_XPATH
+from whatsapp.constants import VIDEO_DOWNLOAD_BUTTON_XPATH
+from whatsapp.constants import CLOSE_BUTTON_MEDIA_XPATH
 
 import pandas as pd
 
-import requests
-
-import urllib.request
-
+from selenium.common.exceptions import ElementNotVisibleException
 
 class Whatsapp(webdriver.Chrome):
     
@@ -114,12 +113,10 @@ class Whatsapp(webdriver.Chrome):
             print('Cercando ' + contactName + '... \n')
             
             contactFound = self.searchContactToClick(chats, contactName)
-            
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
-                self.downloadVideos()
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                # self.getConversation(path, contactName)
+                self.getConversation(path, contactName)
             else:
                 
                 while True:
@@ -149,7 +146,6 @@ class Whatsapp(webdriver.Chrome):
                             
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
-                                self.downloadVideos()
                                 endOfSearch = True
                                 break
                             
@@ -167,9 +163,9 @@ class Whatsapp(webdriver.Chrome):
                     
                 if(endOfSearch):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                    # self.getConversation(path, contactName)
+                    self.getConversation(path, contactName)
                     
-                    
+
                     
     def readContactsFromFile(self, pathToFile):
         contacts = pd.read_csv(pathToFile)
@@ -179,53 +175,99 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName):
 
-        currentWorkingDirectory = DIRECTORY_CALLBACK        
-
-        messagesContainers = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
+        # messagesContainers = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
         
-        for messages in messagesContainers:
+        # print('Scraping text messages... \n')
+        
+        # for messages in messagesContainers:
             
-            dataToAppend = []
+        #     dataToAppend = []
             
-            print('Prossimo messaggio: sono nella cartella ')
-            print(currentWorkingDirectory)
+        #     print('Prossimo messaggio: sono nella cartella ')
+        #     print(DIRECTORY_CALLBACK)
             
-            os.chdir(currentWorkingDirectory)
+        #     os.chdir(DIRECTORY_CALLBACK)
             
-            finalMessage = ""
-            temp = ""
+        #     finalMessage = ""
+        #     temp = ""
             
-            message = messages.find_element(
-                by=By.XPATH,
-                value=XPATH_TEXT_MESSAGES
-            ).text
+        #     message = messages.find_element(
+        #         by=By.XPATH,
+        #         value=XPATH_TEXT_MESSAGES
+        #     ).text
             
-            emojis = messages.find_elements(
-                by=By.XPATH,
-                value=XPATH_EMOJIS
+        #     emojis = messages.find_elements(
+        #         by=By.XPATH,
+        #         value=XPATH_EMOJIS
+        #     )
+            
+        #     senderAndHour = messages.find_element(
+        #         by=By.XPATH,
+        #         value=XPATH_SENDER
+        #     ).get_attribute("data-pre-plain-text")
+
+        #     dataToAppend.append([
+        #         self.getDate(senderAndHour),
+        #         self.getHour(senderAndHour),
+        #         self.getSender(senderAndHour),
+        #         message
+        #     ])
+
+        #     self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+            
+        #     if(len(emojis) != 0):
+        #         for emoji in emojis:
+        #             message = message + emoji.get_attribute("data-plain-text")
+        #             temp += message
+        #         finalMessage = temp
+        #     else:
+        #         finalMessage = message
+
+        print('Scraping media... \n')
+        
+        time.sleep(3)
+        
+        WebDriverWait(self, 60).until(
+            EC.presence_of_element_located((By.XPATH, VIDEO_PLAY_BUTTON_XPATH))
+        )
+
+        videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
+        
+        print(str(len(videoPlayers)) + ' video(s) found... \n')
+        
+        countVideo = 0
+        
+        print('Wait... \n')
+        self.wait(10)
+        
+        for playButton in videoPlayers:
+            
+            countVideo += 1
+            
+            print('Looking for video n. ' + str(countVideo) + '... \n')
+            print(playButton)
+            
+            self.wait(10)
+            
+            playButton.click()
+            
+            print('Clicked! \n')
+            
+            print('Waiting for closure... \n')
+            
+            self.wait(5)
+            
+            self.implicitly_wait(5)
+            
+            WebDriverWait(self, 60).until(
+                EC.presence_of_element_located((By.XPATH, CLOSE_BUTTON_MEDIA_XPATH))
             )
             
-            senderAndHour = messages.find_element(
-                by=By.XPATH,
-                value=XPATH_SENDER
-            ).get_attribute("data-pre-plain-text")
-
-            dataToAppend.append([
-                self.getDate(senderAndHour),
-                self.getHour(senderAndHour),
-                self.getSender(senderAndHour),
-                message
-            ])
-
-            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+            closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
             
-            if(len(emojis) != 0):
-                for emoji in emojis:
-                    message = message + emoji.get_attribute("data-plain-text")
-                    temp += message
-                finalMessage = temp
-            else:
-                finalMessage = message
+            closeButton.click()
+            
+            print('Closed! \n')
 
 
         
@@ -272,25 +314,3 @@ class Whatsapp(webdriver.Chrome):
             if e not in firstList:
                 updatedList.append(e)
         return updatedList
-    
-    
-    
-    def downloadVideos(self):
-        # Scroll to the top of the chat
-        
-        nScrolls = 0
-        pixels = 0
-        pre_height = 0
-        new_height = 0
-        
-        while True:
-            pixels += PIXELS_TO_SCROLL
-            scrollToScript = "(document.querySelectorAll('[data-testid=" + MESSAGES_PANEL_DATATESTID + "]'))[0].scrollTo(0,-1000)"
-            scrollTopScript = "return (document.querySelectorAll('[data-testid=" + MESSAGES_PANEL_DATATESTID + "]'))[0].scrollTop"
-            self.execute_script(scrollToScript)
-            new_height = self.execute_script(scrollTopScript)
-        
-            if(pre_height < new_height):
-                pre_height = self.execute_script(scrollTopScript)
-            else:
-                break

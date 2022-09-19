@@ -45,4 +45,16 @@ DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
 PIXELS_TO_SCROLL = 300
 
 # Messages panel data-testid value
-MESSAGES_PANEL_DATATESTID = ' "conversation-panel-messages" '
+# MESSAGES_PANEL_DATATESTID = ' "conversation-panel-messages" '
+
+# XPath identifier for video play button
+VIDEO_PLAY_BUTTON_XPATH = "//span[contains(@data-testid, 'media-play')]"
+
+# XPath identifier for video download button
+VIDEO_DOWNLOAD_BUTTON_XPATH = "//span[contains(@data-testid, 'download')]"
+
+# XPath identifier for close button (after opening a media)
+CLOSE_BUTTON_MEDIA_XPATH = "//span[contains(@data-testid, 'x-viewer')]"
+
+# XPath identifier for videos container
+# VIDEO_CONTAINER_XPATH = "//div[contains(@class, '_1-FMR message-in focusable-list-item') or contains(@data-testid, 'media-play')]"

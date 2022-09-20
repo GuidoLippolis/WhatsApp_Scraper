@@ -155,8 +155,6 @@ class Whatsapp(webdriver.Chrome):
                             
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
-                                path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                                self.getConversation(path, contactName)
                                 endOfSearch = True
                                 break
                             
@@ -186,57 +184,49 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName):
         
-        downloadMedia = True
-
         messageMetadataList = []
         
-        # messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
+        # Retrieving all divs containing text messages
+        messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
         
-        # textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
+        # Retrieving text messages
+        textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
         
-        # print('Found ' + str(len(messages)) + ' text messages... \n')
-        
-        # for message in messages:
-        #     metadata = message.find_element(
-        #         by=By.XPATH,
-        #         value=XPATH_SENDER
-        #     ).get_attribute("data-pre-plain-text")
-        #     messageMetadataList.append(metadata)
-
-            # emojis = message.find_elements(
-            #     by=By.XPATH,
-            #     value=XPATH_EMOJIS
-            # )
+        for message in messages:
+            # Getting metadata for every message (sender, date and hour)
+            metadata = message.find_element(
+                by=By.XPATH,    
+                value=XPATH_SENDER
+            ).get_attribute("data-pre-plain-text")
             
-            # if(len(emojis)):
-            #     print('Getting emojis...')
-            #     for emoji in emojis:
-            #         print(emoji.get_attribute('alt'))
-                                        
+            messageMetadataList.append(metadata)
             
-        # sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
-        
-        # for row in sortedMetadataDict:
-        #     os.chdir(DIRECTORY_CALLBACK)
-        #     dataToAppend = []
-        #     dataToAppend.append([
-        #         # Date
-        #         (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
-        #         # Hour
-        #         (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
-        #         # Sender
-        #         row[1],
-        #         # Message
-        #         row[2]
-        #     ])
-        #     self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+            # Messages are sorted in descending order (if the last attribute is set to "True")
+            sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
             
-        if(downloadMedia):
-            self.downloadAudios()
-
+            sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
+            
+            for row in sortedMetadataDict:
+                # Getting back to the main directory
+                os.chdir(DIRECTORY_CALLBACK)
+                # Filling a list where data to be written in the .csv file are passed as input
+                dataToAppend = []
+                dataToAppend.append([
+                    # Date
+                    (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
+                    # Hour
+                    (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
+                    # Sender
+                    row[1],
+                    # Message
+                    row[2]
+                ])
+                # A .csv file named as the contact name the scraper is processing is created
+                self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+            
 
         
-    def sortMessagesByTime(self, messageMetadataList, textMessages):
+    def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
         
         metadataDict = []
         finalDict = []
@@ -247,7 +237,7 @@ class Whatsapp(webdriver.Chrome):
             sender = self.getSender(metadata)
             metadataDict.append((timeObj, sender))
             
-        sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0], reverse=True)
+        sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0], reverse=reverse)
         
         for sortedMetadata, textMessage in zip(sortedMetadataDict, textMessages):
             sortedMetadata = sortedMetadata + (textMessage.get_dom_attribute('innerText'), )
@@ -280,6 +270,7 @@ class Whatsapp(webdriver.Chrome):
             downloadButton.click()
 
 
+
     def downloadImages(self):
         
         images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
@@ -306,7 +297,7 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def downloadVideo(self):
+    def downloadVideos(self):
         
         videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
         

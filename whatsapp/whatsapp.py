@@ -4,6 +4,8 @@ Created on Sun Sep  4 12:10:34 2022
 @author: guido
 """
 
+import collections
+
 import time
 
 from datetime import datetime
@@ -21,11 +23,11 @@ from whatsapp.constants import BASE_URL
 from whatsapp.constants import CHAT_LIST_CONTAINER
 from whatsapp.constants import ARCHIVED_CHATS_BUTTON
 from whatsapp.constants import CHAT_SECTION_HTML_ID
-from whatsapp.constants import CHAT_MESSAGES_CONTAINERS
-from whatsapp.constants import XPATH_TEXT_MESSAGES
+from whatsapp.constants import XPATH_TEXT_MESSAGES_CONTAINERS
 from whatsapp.constants import XPATH_EMOJIS
 from whatsapp.constants import HEADER
 from whatsapp.constants import XPATH_SENDER
+from whatsapp.constants import XPATH_TEXT_MESSAGES
 from whatsapp.constants import SCRAPING_DIRECTORY_NAME
 from whatsapp.constants import TIMESTAMP_FORMAT
 from whatsapp.constants import DIRECTORY_CALLBACK
@@ -33,6 +35,7 @@ from whatsapp.constants import PIXELS_TO_SCROLL
 from whatsapp.constants import VIDEO_PLAY_BUTTON_XPATH
 from whatsapp.constants import VIDEO_DOWNLOAD_BUTTON_XPATH
 from whatsapp.constants import CLOSE_BUTTON_MEDIA_XPATH
+from whatsapp.constants import MESSAGE_METADATA_FORMAT
 
 import pandas as pd
 
@@ -146,6 +149,8 @@ class Whatsapp(webdriver.Chrome):
                             
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
+                                path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                                self.getConversation(path, contactName)
                                 endOfSearch = True
                                 break
                             
@@ -177,68 +182,67 @@ class Whatsapp(webdriver.Chrome):
         
         downloadMedia = False
 
-        messagesContainers = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
+        messageMetadataList = []
         
-        print('Scraping ' + str(len(messagesContainers)) + ' text messages... \n')
+        messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
         
-        for messages in messagesContainers:
-            
-            dataToAppend = []
-            
-            os.chdir(DIRECTORY_CALLBACK)
-            
-            finalMessage = ""
-            temp = ""
-            print('New... \n')
-            # Messaggi di testo
-            textMessages = messages.find_elements(
+        textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
+        
+        print('Found ' + str(len(messages)) + ' text messages... \n')
+        
+        # Getting messages along with metadata
+        for message in messages:
+            metadata = message.find_element(
                 by=By.XPATH,
-                value='//span[contains(@class,"i0jNr selectable-text copyable-text") and contains(@dir,"ltr")]'
-            )
+                value=XPATH_SENDER
+            ).get_attribute("data-pre-plain-text")
+            messageMetadataList.append(metadata)
             
-            for m in textMessages:
-                print(m.get_dom_attribute('innerText'))
-                
-            
-            # message = messages.get_dom_attribute('innerText')
-            # print(message)
-            
-            # textMessages = messages.find_element(
-            #     by=By.XPATH,
-            #     value=XPATH_TEXT_MESSAGES
-            # )
-            
-            # emojis = messages.find_elements(
-            #     by=By.XPATH,
-            #     value=XPATH_EMOJIS
-            # )
-            
-            # senderAndHour = messages.find_element(
-            #     by=By.XPATH,
-            #     value=XPATH_SENDER
-            # ).get_attribute("data-pre-plain-text")
+        sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
+        
+        print(sortedMetadataDict)
 
-            # dataToAppend.append([
-            #     self.getDate(senderAndHour),
-            #     self.getHour(senderAndHour),
-            #     self.getSender(senderAndHour),
-            #     message
-            # ])
+        for row in sortedMetadataDict:
+            os.chdir(DIRECTORY_CALLBACK)
+            dataToAppend = []
+            dataToAppend.append([
+                # Date
+                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
+                # Hour
+                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
+                # Sender
+                row[1],
+                # Message
+                row[2]
+            ])
+            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
             
-            # print('Data to append: \n')
-            # print(dataToAppend[0])
-
-            # self.makeCSV(dataToAppend[0], pathToCSV, contactName)
-            
-            # if(len(emojis) != 0):
-            #     for emoji in emojis:
-            #         message = message + emoji.get_attribute("data-plain-text")
-            #         temp += message
-            #     finalMessage = temp
-            # else:
-            #     finalMessage = message
-
         if(downloadMedia):
+            self.downloadMedia()
+
+
+        
+    def sortMetadataByTime(self, messageMetadataList, textMessages):
+        
+        metadataDict = []
+        finalDict = []
+        
+        for metadata in messageMetadataList:
+            timeStr = self.getDateAsString(metadata) + ' ' + self.getHourAsString(metadata)
+            timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT)
+            sender = self.getSender(metadata)
+            metadataDict.append((timeObj, sender))
+            
+        sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0])
+        
+        for sortedMetadata, textMessage in zip(sortedMetadataDict, textMessages):
+            sortedMetadata = sortedMetadata + (textMessage.get_dom_attribute('innerText'), )
+            finalDict.append(sortedMetadata)
+            
+        return finalDict
+            
+    
+    def downloadMedia(self):
         
             videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
             
@@ -272,27 +276,10 @@ class Whatsapp(webdriver.Chrome):
                 closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
                 
                 closeButton.click()
-
-
-        
-    def getSender(self, senderAndHour):
-        return (senderAndHour.split("] ")[1]).split(":")[0]
     
-    
-    
-    def getHour(self, senderAndHour):
-        return (senderAndHour.split("[")[1]).split(",")[0]
-    
-    
-    
-    def getDate(self, senderAndHour):
-        return (senderAndHour.split(", ")[1]).split("]")[0]
-    
-
     
     def makeCSV(self, data, pathToCSV, contactName):
         
-        # os.chdir(os.getcwd())
         os.chdir(pathToCSV)
         if not os.path.exists(contactName):
             os.mkdir(contactName)
@@ -318,10 +305,3 @@ class Whatsapp(webdriver.Chrome):
             if e not in firstList:
                 updatedList.append(e)
         return updatedList
-    
-    
-    
-    def wait(self, seconds):
-        for i in range(1, seconds+1):
-            time.sleep(1)
-            print(str(i) + '... \n')

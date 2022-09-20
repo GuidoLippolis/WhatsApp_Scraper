@@ -13,7 +13,7 @@ CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'
 
 # Containers of all messages of a single chat
 # CHAT_MESSAGES_CONTAINERS = "//div[contains(@class,'message-')]"
-CHAT_MESSAGES_CONTAINERS = "//div//span[contains(@dir,'ltr') and contains(@class,'i0jNr selectable-text copyable-text')]"
+# CHAT_MESSAGES_CONTAINERS = "//div//span[contains(@dir,'ltr') and contains(@class,'i0jNr selectable-text copyable-text')]"
 
 # HTML id value of CHAT_MESSAGES_CONTAINER
 CHAT_SECTION_HTML_ID = 'pane-side'
@@ -21,8 +21,11 @@ CHAT_SECTION_HTML_ID = 'pane-side'
 # Button to get archived chats
 ARCHIVED_CHATS_BUTTON = '//*[@id="pane-side"]/button/div/div[2]/div/div'
 
+# XPath for querying text messages containers without emojis
+XPATH_TEXT_MESSAGES_CONTAINERS = "//div[contains(@data-testid,'msg-container') and contains(@class,'_1-lf9 _3mSPV')]"
+
 # XPath for querying text messages without emojis
-XPATH_TEXT_MESSAGES = "//div[contains(@data-testid,'msg-container') and contains(@class,'_1-lf9 _3mSPV')]"
+XPATH_TEXT_MESSAGES = "//span[contains(@class,'i0jNr selectable-text copyable-text') and contains(@dir,'ltr')]"
 
 # XPath for querying emojis
 XPATH_EMOJIS = ".//img[contains(@class,'selectable-text copyable-text')]"
@@ -56,6 +59,9 @@ VIDEO_DOWNLOAD_BUTTON_XPATH = "//span[contains(@data-testid, 'download')]"
 
 # XPath identifier for close button (after opening a media)
 CLOSE_BUTTON_MEDIA_XPATH = "//span[contains(@data-testid, 'x-viewer')]"
+
+# Format for message metadata
+MESSAGE_METADATA_FORMAT = '%d/%m/%Y %H:%M'
 
 # XPath identifier for videos container
 # VIDEO_CONTAINER_XPATH = "//div[contains(@class, '_1-FMR message-in focusable-list-item') or contains(@data-testid, 'media-play')]"

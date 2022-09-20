@@ -236,7 +236,7 @@ class Whatsapp(webdriver.Chrome):
 
 
         
-    def sortMetadataByTime(self, messageMetadataList, textMessages):
+    def sortMessagesByTime(self, messageMetadataList, textMessages):
         
         metadataDict = []
         finalDict = []

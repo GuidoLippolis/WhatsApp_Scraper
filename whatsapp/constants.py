@@ -48,10 +48,22 @@ PIXELS_TO_SCROLL = 300
 VIDEO_PLAY_BUTTON_XPATH = "//div//span[contains(@data-testid,'media-play')]"
 
 # XPath identifier for video download button
-VIDEO_DOWNLOAD_BUTTON_XPATH = "//span[contains(@data-testid, 'download')]"
+DOWNLOAD_BUTTON_XPATH = "//span[contains(@data-testid, 'download')]"
 
 # XPath identifier for close button (after opening a media)
 CLOSE_BUTTON_MEDIA_XPATH = "//span[contains(@data-testid, 'x-viewer')]"
 
 # Format for message metadata
 MESSAGE_METADATA_FORMAT = '%d/%m/%Y %H:%M'
+
+# XPath for image tags
+XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb')]"
+
+# XPath for audio play buttons
+XPATH_AUDIOS = "//span[contains(@data-testid, 'audio-play')]"
+
+# XPath for drop down menu for downloading audios
+XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//span[contains(@data-testid, 'down-context')]"
+
+# XPath for downloading audios
+XPATH_DOWNLOAD_AUDIOS = "//span//li[contains(@data-testid, 'mi-msg-download')]"

@@ -33,13 +33,19 @@ from whatsapp.constants import TIMESTAMP_FORMAT
 from whatsapp.constants import DIRECTORY_CALLBACK
 from whatsapp.constants import PIXELS_TO_SCROLL
 from whatsapp.constants import VIDEO_PLAY_BUTTON_XPATH
-from whatsapp.constants import VIDEO_DOWNLOAD_BUTTON_XPATH
+from whatsapp.constants import DOWNLOAD_BUTTON_XPATH
 from whatsapp.constants import CLOSE_BUTTON_MEDIA_XPATH
 from whatsapp.constants import MESSAGE_METADATA_FORMAT
+from whatsapp.constants import XPATH_IMAGES
+from whatsapp.constants import XPATH_AUDIOS
+from whatsapp.constants import XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS
+from whatsapp.constants import XPATH_DOWNLOAD_AUDIOS
 
 import pandas as pd
 
 from selenium.common.exceptions import ElementNotVisibleException
+
+from selenium.webdriver import ActionChains
 
 class Whatsapp(webdriver.Chrome):
     
@@ -69,7 +75,7 @@ class Whatsapp(webdriver.Chrome):
             name = contact.get_attribute('title')
             if(len(name) != 0 and name == contactToSearch):
                     contact.click()
-                    # self.wait(25)
+                    self.wait(3)
                     return True
                 
                 
@@ -180,56 +186,53 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName):
         
-        downloadMedia = False
+        downloadMedia = True
 
         messageMetadataList = []
         
-        messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
+        # messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
         
-        textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
+        # textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
         
-        print('Found ' + str(len(messages)) + ' text messages... \n')
+        # print('Found ' + str(len(messages)) + ' text messages... \n')
         
-        # Getting messages along with metadata
-        for message in messages:
-            metadata = message.find_element(
-                by=By.XPATH,
-                value=XPATH_SENDER
-            ).get_attribute("data-pre-plain-text")
-            messageMetadataList.append(metadata)
+        # for message in messages:
+        #     metadata = message.find_element(
+        #         by=By.XPATH,
+        #         value=XPATH_SENDER
+        #     ).get_attribute("data-pre-plain-text")
+        #     messageMetadataList.append(metadata)
 
-            emojis = message.find_elements(
-                by=By.XPATH,
-                value=XPATH_EMOJIS
-            )
+            # emojis = message.find_elements(
+            #     by=By.XPATH,
+            #     value=XPATH_EMOJIS
+            # )
             
-            if(len(emojis)):
-                print('Getting emojis...')
-                for emoji in emojis:
-                    print(emoji.get_attribute('alt'))
+            # if(len(emojis)):
+            #     print('Getting emojis...')
+            #     for emoji in emojis:
+            #         print(emoji.get_attribute('alt'))
                                         
             
-        sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
+        # sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
         
-        print(sortedMetadataDict)
-
-        for row in sortedMetadataDict:
-            os.chdir(DIRECTORY_CALLBACK)
-            dataToAppend = []
-            dataToAppend.append([
-                # Date
-                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
-                # Hour
-                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
-                # Sender
-                row[1],
-                # Message
-                row[2]
-            ])
-            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+        # for row in sortedMetadataDict:
+        #     os.chdir(DIRECTORY_CALLBACK)
+        #     dataToAppend = []
+        #     dataToAppend.append([
+        #         # Date
+        #         (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
+        #         # Hour
+        #         (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
+        #         # Sender
+        #         row[1],
+        #         # Message
+        #         row[2]
+        #     ])
+        #     self.makeCSV(dataToAppend[0], pathToCSV, contactName)
             
         if(downloadMedia):
-            self.downloadMedia()
+            self.downloadAudios()
 
 
         
@@ -244,50 +247,125 @@ class Whatsapp(webdriver.Chrome):
             sender = self.getSender(metadata)
             metadataDict.append((timeObj, sender))
             
-        sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0])
+        sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0], reverse=True)
         
         for sortedMetadata, textMessage in zip(sortedMetadataDict, textMessages):
             sortedMetadata = sortedMetadata + (textMessage.get_dom_attribute('innerText'), )
             finalDict.append(sortedMetadata)
             
         return finalDict
-            
-    
-    
-    def downloadMedia(self):
+     
+
+    def downloadAudios(self):
         
-            videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
+        audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
+        
+        print(str(len(audios)) + ' audio(s) found... \n')
+        
+        countAudio = 0
+        
+        for audio in audios:
             
-            print(str(len(videoPlayers)) + ' video(s) found... \n')
+            countAudio += 1
+ 
+            print('Cercando immagine n. ' + str(countAudio) + '... \n')
             
-            countVideo = 0
+            self.wait(5)
             
-            for playButton in videoPlayers:
-                
-                countVideo += 1
-                
-                print('Looking for video n. ' + str(countVideo) + '... \n')
-                print(playButton)
-                
-                playButton.click()
-                
-                WebDriverWait(self, 60).until(
-                    EC.presence_of_element_located((By.XPATH, VIDEO_DOWNLOAD_BUTTON_XPATH))
-                )
-                
-                downloadButton = self.find_element(by=By.XPATH, value=VIDEO_DOWNLOAD_BUTTON_XPATH)
-                
-                downloadButton.click()
-                
-                print('Downloaded! \n')
-                
-                WebDriverWait(self, 60).until(
-                    EC.presence_of_element_located((By.XPATH, CLOSE_BUTTON_MEDIA_XPATH))
-                )
-                
-                closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
-                
-                closeButton.click()
+            a = ActionChains(self)
+            a.move_to_element(audio).perform()
+            
+            print('Hover! \n')
+            
+            dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
+            
+            self.wait(2)
+            
+            dropDownMenu.click()
+            
+            print('Drop down menu clicked! \n')
+            
+            self.wait(2)
+            
+            downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
+            
+            downloadButton.click()
+
+
+    def downloadImages(self):
+        
+        images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
+        
+        print(str(len(images)) + ' image(s) found... \n')
+        
+        countImages = 0
+        
+        for image in images:
+            
+            countImages += 1
+            
+            print('Cercando immagine n. ' + str(countImages) + '... \n')
+            
+            self.wait(5)
+            
+            image.click()
+            
+            self.wait(5)
+            
+            downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
+            
+            downloadButton.click()
+            
+            print('Downloaded! \n')
+            
+            self.wait(2)
+            
+            closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
+            
+            closeButton.click()
+        
+        return
+    
+    
+    
+    def downloadVideo(self):
+        
+        videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
+        
+        print(str(len(videoPlayers)) + ' video(s) found... \n')
+        
+        countVideo = 0
+        
+        for playButton in videoPlayers:
+            
+            countVideo += 1
+            
+            print('Looking for video n. ' + str(countVideo) + '... \n')
+            print(playButton)
+            
+            playButton.click()
+            
+            WebDriverWait(self, 60).until(
+                EC.presence_of_element_located((By.XPATH, DOWNLOAD_BUTTON_XPATH))
+            )
+            
+            self.wait(5)
+            
+            downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
+            
+            downloadButton.click()
+            
+            print('Downloaded! \n')
+            
+            WebDriverWait(self, 60).until(
+                EC.presence_of_element_located((By.XPATH, CLOSE_BUTTON_MEDIA_XPATH))
+            )
+            
+            closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
+            
+            self.wait(2)
+            
+            closeButton.click()
     
     
     
@@ -333,3 +411,10 @@ class Whatsapp(webdriver.Chrome):
             if e not in firstList:
                 updatedList.append(e)
         return updatedList
+    
+    
+    
+    def wait(self, seconds):
+        for i in range(1, seconds+1):
+            time.sleep(1)
+            print(str(i) + '... \n')

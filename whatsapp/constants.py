@@ -11,10 +11,6 @@ BASE_URL = "https://web.whatsapp.com/"
 # Container of all open chats in the home page
 CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'
 
-# Containers of all messages of a single chat
-# CHAT_MESSAGES_CONTAINERS = "//div[contains(@class,'message-')]"
-# CHAT_MESSAGES_CONTAINERS = "//div//span[contains(@dir,'ltr') and contains(@class,'i0jNr selectable-text copyable-text')]"
-
 # HTML id value of CHAT_MESSAGES_CONTAINER
 CHAT_SECTION_HTML_ID = 'pane-side'
 
@@ -28,7 +24,7 @@ XPATH_TEXT_MESSAGES_CONTAINERS = "//div[contains(@data-testid,'msg-container') a
 XPATH_TEXT_MESSAGES = "//span[contains(@class,'i0jNr selectable-text copyable-text') and contains(@dir,'ltr')]"
 
 # XPath for querying emojis
-XPATH_EMOJIS = ".//img[contains(@class,'selectable-text copyable-text')]"
+XPATH_EMOJIS = "//img[contains(@class,'selectable-text copyable-text')]"
 
 # XPath of message sender
 XPATH_SENDER = ".//div[contains(@data-pre-plain-text,'[')]"
@@ -48,9 +44,6 @@ DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
 # Number of pixels to scroll
 PIXELS_TO_SCROLL = 300
 
-# Messages panel data-testid value
-# MESSAGES_PANEL_DATATESTID = ' "conversation-panel-messages" '
-
 # XPath identifier for video play button
 VIDEO_PLAY_BUTTON_XPATH = "//div//span[contains(@data-testid,'media-play')]"
 
@@ -62,6 +55,3 @@ CLOSE_BUTTON_MEDIA_XPATH = "//span[contains(@data-testid, 'x-viewer')]"
 
 # Format for message metadata
 MESSAGE_METADATA_FORMAT = '%d/%m/%Y %H:%M'
-
-# XPath identifier for videos container
-# VIDEO_CONTAINER_XPATH = "//div[contains(@class, '_1-FMR message-in focusable-list-item') or contains(@data-testid, 'media-play')]"

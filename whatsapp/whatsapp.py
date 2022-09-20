@@ -197,6 +197,17 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_SENDER
             ).get_attribute("data-pre-plain-text")
             messageMetadataList.append(metadata)
+
+            emojis = message.find_elements(
+                by=By.XPATH,
+                value=XPATH_EMOJIS
+            )
+            
+            if(len(emojis)):
+                print('Getting emojis...')
+                for emoji in emojis:
+                    print(emoji.get_attribute('alt'))
+                                        
             
         sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
         
@@ -242,6 +253,7 @@ class Whatsapp(webdriver.Chrome):
         return finalDict
             
     
+    
     def downloadMedia(self):
         
             videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
@@ -278,6 +290,7 @@ class Whatsapp(webdriver.Chrome):
                 closeButton.click()
     
     
+    
     def makeCSV(self, data, pathToCSV, contactName):
         
         os.chdir(pathToCSV)
@@ -294,6 +307,21 @@ class Whatsapp(webdriver.Chrome):
         
         
         
+    def getSender(self, messageMetadata):
+        return (messageMetadata.split("] ")[1]).split(":")[0]
+    
+    
+    
+    def getHourAsString(self, messageMetadata):
+        return (messageMetadata.split("[")[1]).split(",")[0]
+    
+    
+    
+    def getDateAsString(self, messageMetadata):
+        return (messageMetadata.split(", ")[1]).split("]")[0]  
+        
+    
+    
     def getTimeStamp(self):
         return ((datetime.now()).strftime(TIMESTAMP_FORMAT)).replace(":","")
     

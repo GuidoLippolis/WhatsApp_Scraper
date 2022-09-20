@@ -204,8 +204,6 @@ class Whatsapp(webdriver.Chrome):
             # Messages are sorted in descending order (if the last attribute is set to "True")
             sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
             
-            sortedMetadataDict = self.sortMetadataByTime(messageMetadataList, textMessages)
-            
             for row in sortedMetadataDict:
                 # Getting back to the main directory
                 os.chdir(DIRECTORY_CALLBACK)

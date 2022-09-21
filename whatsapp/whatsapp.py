@@ -291,8 +291,6 @@ class Whatsapp(webdriver.Chrome):
             
             closeButton.click()
         
-        return
-    
     
     
     def downloadVideos(self):

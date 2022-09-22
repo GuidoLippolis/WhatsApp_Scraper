@@ -125,7 +125,8 @@ class Whatsapp(webdriver.Chrome):
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                self.getConversation(path, contactName)
+                self.downloadAudios()
+                # self.getConversation(path, contactName)
             else:
                 
                 while True:
@@ -156,6 +157,7 @@ class Whatsapp(webdriver.Chrome):
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
                                 endOfSearch = True
+                                self.downloadAudios()
                                 break
                             
                             break

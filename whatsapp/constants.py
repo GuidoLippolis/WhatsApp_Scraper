@@ -42,7 +42,7 @@ TIMESTAMP_FORMAT = "%H:%M:%S%f"
 DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
 
 # Number of pixels to scroll
-PIXELS_TO_SCROLL = 300
+PIXELS_TO_SCROLL = 250
 
 # XPath identifier for video play button
 VIDEO_PLAY_BUTTON_XPATH = "//div//span[contains(@data-testid,'media-play')]"
@@ -67,3 +67,6 @@ XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//span[contains(@data-testid, 'down-cont
 
 # XPath for downloading audios
 XPATH_DOWNLOAD_AUDIOS = "//span//li[contains(@data-testid, 'mi-msg-download')]"
+
+# Path to Downloads folder in Windows
+DOWNLOADS_PATH = "C://Users//guido//Downloads"

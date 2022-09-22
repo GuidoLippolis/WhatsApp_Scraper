@@ -125,8 +125,8 @@ class Whatsapp(webdriver.Chrome):
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                self.downloadAudios()
-                # self.getConversation(path, contactName)
+                # self.downloadAudios()
+                self.getConversation(path, contactName)
             else:
                 
                 while True:
@@ -157,7 +157,9 @@ class Whatsapp(webdriver.Chrome):
                             if(contactFoundInScrolledChats):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
                                 endOfSearch = True
-                                self.downloadAudios()
+                                # self.downloadAudios()
+                                path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                                self.getConversation(path, contactName)
                                 break
                             
                             break
@@ -265,10 +267,14 @@ class Whatsapp(webdriver.Chrome):
             
             dropDownMenu.click()
             
+            self.wait(3)
+            
             downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
             
             downloadButton.click()
-
+            
+            self.wait(3)
+        
 
 
     def downloadImages(self):

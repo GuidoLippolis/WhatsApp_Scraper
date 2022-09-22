@@ -120,7 +120,7 @@ class Whatsapp(webdriver.Chrome):
         for contactName in contactNamesFromCSV:
             
             print('Cercando ' + contactName + '... \n')
-            # test
+            
             contactFound = self.searchContactToClick(chats, contactName)
             if(contactFound):
                 print('Contatto trovato senza scrollare \n')

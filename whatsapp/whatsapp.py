@@ -44,7 +44,7 @@ class Whatsapp(webdriver.Chrome):
         
     def searchContactToClick(self, contacts, contactToSearch):
         for contact in contacts:
-            self.wait(1)
+            time.sleep(1)
             name = contact.get_attribute('title')
             if(len(name) != 0):
                 if(name == contactToSearch):
@@ -76,7 +76,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
         
-        self.wait(1)
+        time.sleep(1)
         chats = self.getContacts()
         
         print('Prima di scrollare erano presenti: \n')
@@ -105,7 +105,7 @@ class Whatsapp(webdriver.Chrome):
                     while True:
                         try:
                             self.implicitly_wait(200)
-                            self.wait(1)
+                            time.sleep(1)
                             scrolledChats = self.getContacts()
                             
                             scrolledChatsAsStrings = self.fillNameList(scrolledChats)

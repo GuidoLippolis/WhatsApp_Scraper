@@ -43,13 +43,40 @@ class Whatsapp(webdriver.Chrome):
         
         
     def searchContactToClick(self, contacts, contactToSearch):
+        
+        print('Sono in searchContactToClick \n')
+        print('Devo cercare tra ' + str(len(contacts)) + ' contatti se è presente ' + contactToSearch)
+        
+        count = 0
+        
         for contact in contacts:
-            time.sleep(1)
             name = contact.get_attribute('title')
             if(len(name) != 0):
+                count += 1
+                print('Confronto con il contatto n. ' + str(count) + '\n')
+                print('Contact = ' + name)
                 if(name == contactToSearch):
+                    print('TROVATO! \n')
                     contact.click()
                     return True
+                
+        # for contact in contacts:
+            
+        #     time.sleep(5)
+            
+        #     name = contact.get_attribute('title')
+            
+        #     print('Contact: ' + name)
+        #     print('\n')
+        #     print('Contact to search: ' + contactToSearch)
+            
+        #     # if(len(name) != 0):
+        #     if(name == contactToSearch):
+        #         print('TROVATO!!! \n')
+        #         contact.click()
+        #         return True
+        #     else:
+        #         return False
                 
                 
                 
@@ -91,7 +118,7 @@ class Whatsapp(webdriver.Chrome):
             
             contactFound = self.searchContactToClick(chats, contactName)
             
-            if(contactFound):
+            if(contactFound == True):
                 print('Contatto trovato senza scrollare \n')
             else:
                 
@@ -117,8 +144,8 @@ class Whatsapp(webdriver.Chrome):
                             
                             print('Contact found = ' + str(contactFoundInScrolledChats))
                             
-                            if(contactFoundInScrolledChats):
-                                print('Contatto trovato \n')
+                            if(contactFoundInScrolledChats == True):
+                                print('Contatto trovato  allo scroll n. ' + str(nScrolls) + '\n')
                                 endOfSearch = True
                                 break
                             

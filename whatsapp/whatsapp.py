@@ -70,12 +70,21 @@ class Whatsapp(webdriver.Chrome):
         
         
     def searchContactToClick(self, contacts, contactToSearch):
+        
+        print('Sono in searchContactToClick \n')
+        print('Devo cercare tra ' + str(len(contacts)) + ' contatti se è presente ' + contactToSearch)
+        
+        count = 0
+        
         for contact in contacts:
-            time.sleep(1)
             name = contact.get_attribute('title')
-            if(len(name) != 0 and name == contactToSearch):
+            if(len(name) != 0):
+                count += 1
+                print('Confronto con il contatto n. ' + str(count) + '\n')
+                print('Contact = ' + name)
+                if(name == contactToSearch):
+                    print('TROVATO! \n')
                     contact.click()
-                    self.wait(3)
                     return True
                 
                 
@@ -122,10 +131,9 @@ class Whatsapp(webdriver.Chrome):
             print('Cercando ' + contactName + '... \n')
             
             contactFound = self.searchContactToClick(chats, contactName)
-            if(contactFound):
+            if(contactFound == True):
                 print('Contatto trovato senza scrollare \n')
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                # self.downloadAudios()
                 self.getConversation(path, contactName)
             else:
                 
@@ -154,10 +162,9 @@ class Whatsapp(webdriver.Chrome):
                             
                             print('Contact found = ' + str(contactFoundInScrolledChats))
                             
-                            if(contactFoundInScrolledChats):
+                            if(contactFoundInScrolledChats == True):
                                 print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
                                 endOfSearch = True
-                                # self.downloadAudios()
                                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                                 self.getConversation(path, contactName)
                                 break
@@ -204,30 +211,30 @@ class Whatsapp(webdriver.Chrome):
             ).get_attribute("data-pre-plain-text")
             
             messageMetadataList.append(metadata)
+
+        # Messages are sorted in descending order (if the last attribute is set to "True")
+        sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
             
-            # Messages are sorted in descending order (if the last attribute is set to "True")
-            sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
-            
-            for row in sortedMetadataDict:
+        for row in sortedMetadataDict:
                 # Getting back to the main directory
-                os.chdir(DIRECTORY_CALLBACK)
+            os.chdir(DIRECTORY_CALLBACK)
                 # Filling a list where data to be written in the .csv file are passed as input
-                dataToAppend = []
-                dataToAppend.append([
+            dataToAppend = []
+            dataToAppend.append([
                     # Date
-                    (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
+                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
                     # Hour
-                    (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
+                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
                     # Sender
-                    row[1],
+                row[1],
                     # Message
-                    row[2]
-                ])
+                row[2]
+            ])
                 # A .csv file named as the contact name the scraper is processing is created
-                self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
             
 
-        
+    
     def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
         
         metadataDict = []
@@ -238,12 +245,20 @@ class Whatsapp(webdriver.Chrome):
             timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT)
             sender = self.getSender(metadata)
             metadataDict.append((timeObj, sender))
-            
-        sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0], reverse=reverse)
         
-        for sortedMetadata, textMessage in zip(sortedMetadataDict, textMessages):
-            sortedMetadata = sortedMetadata + (textMessage.get_dom_attribute('innerText'), )
-            finalDict.append(sortedMetadata)
+        if(reverse == True):
+            
+            textMessages.reverse()
+            sortedMetadataDict = sorted(metadataDict, key = lambda x: x[0], reverse=reverse)
+            
+            for sortedMetadata, textMessage in zip(sortedMetadataDict, textMessages):
+                sortedMetadata = sortedMetadata + (textMessage.get_dom_attribute('innerText'), )
+                finalDict.append(sortedMetadata)
+        else:
+            
+            for sortedMetadata, textMessage in zip(metadataDict, textMessages):
+                sortedMetadata = sortedMetadata + (textMessage.get_dom_attribute('innerText'), )
+                finalDict.append(sortedMetadata)
             
         return finalDict
      

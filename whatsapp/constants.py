@@ -17,7 +17,7 @@ CHAT_SECTION_HTML_ID = 'pane-side'
 # Button to get archived chats
 ARCHIVED_CHATS_BUTTON = '//*[@id="pane-side"]/button/div/div[2]/div/div'
 
-# XPath for querying text messages containers without emojis
+# XPath for querying text messages containers without emojis and with metadata (hour, date and sender)
 XPATH_TEXT_MESSAGES_CONTAINERS = "//div[contains(@data-testid,'msg-container') and contains(@class,'_1-lf9 _3mSPV')]"
 
 # XPath for querying text messages without emojis

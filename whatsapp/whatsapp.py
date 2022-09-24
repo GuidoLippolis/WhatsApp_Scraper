@@ -181,10 +181,6 @@ class Whatsapp(webdriver.Chrome):
                     else:
                         break
                     
-                if(endOfSearch):
-                    path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                    self.getConversation(path, contactName)
-                    
 
                     
     def readContactsFromFile(self, pathToFile):

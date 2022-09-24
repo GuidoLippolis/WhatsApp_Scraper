@@ -55,11 +55,20 @@ class Whatsapp(webdriver.Chrome):
         
         
     def searchContactToClick(self, contacts, contactToSearch):
+        
+        print('Sono in searchContactToClick \n')
+        print('Devo cercare tra ' + str(len(contacts)) + ' contatti se è presente ' + contactToSearch)
+        
+        count = 0
+        
         for contact in contacts:
-            time.sleep(1)
             name = contact.get_attribute('title')
             if(len(name) != 0):
+                count += 1
+                print('Confronto con il contatto n. ' + str(count) + '\n')
+                print('Contact = ' + name)
                 if(name == contactToSearch):
+                    print('TROVATO! \n')
                     contact.click()
                     return True
                 
@@ -108,7 +117,7 @@ class Whatsapp(webdriver.Chrome):
             
             contactFound = self.searchContactToClick(chats, contactName)
             
-            if(contactFound):
+            if(contactFound == True):
                 print('Contatto trovato senza scrollare \n')
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                 self.getConversation(path, contactName)
@@ -136,8 +145,10 @@ class Whatsapp(webdriver.Chrome):
                             
                             print('Contact found = ' + str(contactFoundInScrolledChats))
                             
-                            if(contactFoundInScrolledChats):
-                                print('Contatto trovato \n')
+                            if(contactFoundInScrolledChats == True):
+                                print('Contatto trovato  allo scroll n. ' + str(nScrolls) + '\n')
+                                path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                                self.getConversation(path, contactName)
                                 endOfSearch = True
                                 break
                             
@@ -163,18 +174,16 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName):
 
-        currentWorkingDirectory = DIRECTORY_CALLBACK        
-
         messagesContainers = self.find_elements(by=By.XPATH, value=CHAT_MESSAGES_CONTAINERS)
         
         for messages in messagesContainers:
             
             dataToAppend = []
             
-            print('Prossimo messaggio: sono nella cartella ')
-            print(currentWorkingDirectory)
+            os.chdir(DIRECTORY_CALLBACK)
             
-            os.chdir(currentWorkingDirectory)
+            print('Prossimo messaggio: sono nella cartella ')
+            print(DIRECTORY_CALLBACK)
             
             finalMessage = ""
             temp = ""
@@ -184,10 +193,10 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_TEXT_MESSAGES
             ).text
             
-            emojis = messages.find_elements(
-                by=By.XPATH,
-                value=XPATH_EMOJIS
-            )
+            # emojis = messages.find_elements(
+            #     by=By.XPATH,
+            #     value=XPATH_EMOJIS
+            # )
             
             senderAndHour = messages.find_element(
                 by=By.XPATH,
@@ -203,13 +212,13 @@ class Whatsapp(webdriver.Chrome):
 
             self.makeCSV(dataToAppend[0], pathToCSV, contactName)
             
-            if(len(emojis) != 0):
-                for emoji in emojis:
-                    message = message + emoji.get_attribute("data-plain-text")
-                    temp += message
-                finalMessage = temp
-            else:
-                finalMessage = message
+            # if(len(emojis) != 0):
+            #     for emoji in emojis:
+            #         message = message + emoji.get_attribute("data-plain-text")
+            #         temp += message
+            #     finalMessage = temp
+            # else:
+            #     finalMessage = message
 
 
         
@@ -229,7 +238,7 @@ class Whatsapp(webdriver.Chrome):
 
     
     def makeCSV(self, data, pathToCSV, contactName):
-        
+        print('Make CSV... \n')
         os.chdir(os.getcwd())
         os.chdir(pathToCSV)
         if not os.path.exists(contactName):

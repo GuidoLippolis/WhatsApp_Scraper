@@ -99,24 +99,35 @@ class Whatsapp(webdriver.Chrome):
         archivedChatsButton = self.find_element(by=By.XPATH, value=ARCHIVED_CHATS_BUTTON)
         archivedChatsButton.click()
         
-        self.wait(10)
+        unarchivedContacts = []
+        
+        self.wait(15)
         
         archivedChats = self.find_elements(by=By.XPATH, value=XPATH_ARCHIVED_CHATS)
         
-        countArchivedChats = 0
+        archivedChats2 = []
         
-        for chat in archivedChats:
-            countArchivedChats += 1
-            print('Unarchiving chat n. ' + str(countArchivedChats) + ': ' + chat.get_attribute('title'))
-            self.wait(5)
-            a = ActionChains(self)
-            a.move_to_element(chat).perform()
-            dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
-            dropDownArchivedChatButton.click()
-            self.wait(5)
-            unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
-            unarchiveButton.click()
-            self.wait(5)
+        for a in archivedChats:
+            if(len(a.get_attribute('title')) != 0):
+                archivedChats2.append(a)
+
+        for chat in archivedChats2:
+            print('Stampo il nome della chat \n')
+            if(chat.is_displayed()):
+                unarchivedContacts.append(chat.get_attribute('title'))
+                print('Unarchiving contact ' + chat.get_attribute('title') + '... \n')
+                self.wait(5)
+                a = ActionChains(self)
+                print('a.move_to_element(chat).perform() \n')
+                a.move_to_element(chat).perform()
+                self.wait(1)
+                print('Recupero il bottone drop down \n')
+                dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
+                dropDownArchivedChatButton.click()
+                self.wait(1)
+                print('Recupero il bottone unarchive \n')
+                unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
+                unarchiveButton.click()
         
 
     
@@ -211,6 +222,8 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName):
         
+        print('Getting conversation with ' + contactName + '... \n')
+        
         messageMetadataList = []
         
         # Retrieving all divs containing text messages
@@ -220,6 +233,13 @@ class Whatsapp(webdriver.Chrome):
         textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
         
         for message in messages:
+            
+            WebDriverWait(self, 15).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, ".//div[contains(@title,'message-')]")
+                )    
+            )
+            
             # Getting metadata for every message (sender, date and hour)
             metadata = message.find_element(
                 by=By.XPATH,    
@@ -278,6 +298,7 @@ class Whatsapp(webdriver.Chrome):
             
         return finalDict
      
+
 
     def downloadAudios(self):
         

@@ -304,16 +304,9 @@ class Whatsapp(webdriver.Chrome):
         
         audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
         
-        print(str(len(audios)) + ' audio(s) found... \n')
-        
-        countAudio = 0
-        
         for audio in audios:
             
-            countAudio += 1
- 
-            a = ActionChains(self)
-            a.move_to_element(audio).perform()
+            ActionChains(self).move_to_element(audio).perform()
             
             dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
             
@@ -333,19 +326,17 @@ class Whatsapp(webdriver.Chrome):
         
         images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
         
-        print(str(len(images)) + ' images(s) found... \n')
-        
-        countImages = 0
-        
         for image in images:
             
-            countImages += 1
-            
             image.click()
+            
+            self.wait(3)
             
             downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
             
             downloadButton.click()
+            
+            self.wait(3)
             
             closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
             
@@ -357,26 +348,17 @@ class Whatsapp(webdriver.Chrome):
         
         videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
         
-        print(str(len(videoPlayers)) + ' video(s) found... \n')
-        
-        countVideo = 0
-        
         for playButton in videoPlayers:
-            
-            countVideo += 1
-            
-            print('Looking for video n. ' + str(countVideo) + '... \n')
-            print(playButton)
             
             playButton.click()
             
-            WebDriverWait(self, 60).until(
-                EC.presence_of_element_located((By.XPATH, DOWNLOAD_BUTTON_XPATH))
-            )
+            self.wait(5)
             
             downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
             
             downloadButton.click()
+            
+            self.wait(3)
             
             closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
             

@@ -48,17 +48,19 @@ from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
 from whatsapp.constants import DOWNLOADS_PATH
 from whatsapp.constants import XPATH_PDF_LIST
 from whatsapp.constants import WHATSAPP_FOLDER
+from whatsapp.constants import ACCEPTED_EXTENSION
 
 import pandas as pd
+
+from whatsapp.exceptions.exceptions import ImageNotFoundException
+from whatsapp.exceptions.exceptions import VideoNotFoundException
+from whatsapp.exceptions.exceptions import AudioNotFoundException
+from whatsapp.exceptions.exceptions import DocumentNotFoundException
 
 class Whatsapp(webdriver.Chrome):
     
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
         self.driver_path = driver_path
-        os.chdir(DOWNLOADS_PATH)
-        if not os.path.exists(DOWNLOADS_PATH + "//" + WHATSAPP_FOLDER):
-            os.mkdir(WHATSAPP_FOLDER)
-        os.chdir(DIRECTORY_CALLBACK)
         super(Whatsapp, self).__init__()
         
         
@@ -187,7 +189,7 @@ class Whatsapp(webdriver.Chrome):
                 
                 if(downloadMediaCheckbox == True):
                     self.downloadMedia()
-                    self.moveFilesToMainDirectory(path + "//" + contactName)
+                    # self.moveFilesToMainDirectory(path + "//" + contactName + "//")
                 
             else:
                 
@@ -224,7 +226,7 @@ class Whatsapp(webdriver.Chrome):
                                 
                                 if(downloadMediaCheckbox == True):
                                     self.downloadMedia()
-                                    self.moveFilesToMainDirectory(path + "//" + contactName)
+                                    # self.moveFilesToMainDirectory(path + "//" + contactName + "//")
                                 
                                 break
                             
@@ -348,106 +350,123 @@ class Whatsapp(webdriver.Chrome):
         
         self.wait(10)
         
-        audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
+        try:
+            audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
         
-        if(len(audios) != 0):
-            print(str(len(audios)) + ' audio(s) found... \n')
-            for audio in audios:
+            if(len(audios) != 0):
+                print(str(len(audios)) + ' audio(s) found... \n')
+                for audio in audios:
+                    
+                    ActionChains(self).move_to_element(audio).perform()
+                    
+                    dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
+                    
+                    dropDownMenu.click()
+                    
+                    self.wait(3)
+                    
+                    downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
+                    
+                    downloadButton.click()
+                    
+                    self.wait(3)
+            else:
+                raise AudioNotFoundException("ERRORE! AUDIO NON PRESENTI! \n")
                 
-                self.wait(3)
-                
-                ActionChains(self).move_to_element(audio).perform()
-                
-                dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
-                
-                dropDownMenu.click()
-                
-                self.wait(3)
-                
-                downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
-                
-                downloadButton.click()
-        else:
-            print('No audios found... \n')
+        except AudioNotFoundException as anf:
+            print(anf)
         
 
 
     def downloadImages(self):
-        
-        images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
-        
-        if(len(images) != 0):
-            print(str(len(images)) + ' image(s) found... \n')
-            for image in images:
-                
-                self.wait(10)
-                
-                image.click()
-
-                self.wait(3)
-                
-                downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
-                
-                downloadButton.click()
-                
-                self.wait(3)
-                
-                closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
-                
-                closeButton.click()
-        else:
-            print('No images found... \n')
+        print('Download images method called \n')
+        try:
+            images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
+            
+            if(len(images) != 0):
+                print(str(len(images)) + ' image(s) found... \n')
+                for image in images:
+                    
+                    self.wait(10)
+                    
+                    image.click()
+    
+                    self.wait(3)
+                    
+                    downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
+                    
+                    downloadButton.click()
+                    
+                    self.wait(3)
+                    
+                    closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
+                    
+                    closeButton.click()
+            else:
+                raise ImageNotFoundException("ERRORE! IMMAGINI NON PRESENTI! \n")
+            
+        except ImageNotFoundException as inf:
+            print(inf)
         
     
     
     def downloadVideos(self):
         
-        videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
-        
-        if(len(videoPlayers) != 0):
-            print(str(len(videoPlayers)) + ' video(s) found... \n')
-            for playButton in videoPlayers:
-                
-                self.wait(10)
-                
-                playButton.click()
-                
-                self.wait(5)
-                
-                downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
-                
-                downloadButton.click()
-                
-                self.wait(3)
-                
-                closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
-                
-                closeButton.click()
-        else:
-            print('No videos found... \n')
+        try:
             
+            videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
+            
+            if(len(videoPlayers) != 0):
+                print(str(len(videoPlayers)) + ' video(s) found... \n')
+                for playButton in videoPlayers:
+                    
+                    self.wait(10)
+                    
+                    playButton.click()
+                    
+                    self.wait(5)
+                    
+                    downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
+                    
+                    downloadButton.click()
+                    
+                    self.wait(3)
+                    
+                    closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
+                    
+                    closeButton.click()
+            else:
+                raise VideoNotFoundException("ERRORE! VIDEO NON PRESENTI! \n")
+                    
+        except VideoNotFoundException as vnf:
+            print(vnf)
             
             
     def downloadDocuments(self):
         
-        pdfList = self.find_elements(by=By.XPATH, value=XPATH_PDF_LIST)
+        try:
+            
+            pdfList = self.find_elements(by=By.XPATH, value=XPATH_PDF_LIST)
+            
+            if(len(pdfList) != 0):
+                print(str(len(pdfList)) + ' PDF(s) found... \n')
+                for pdf in pdfList:
+                    
+                    self.wait(10)
+                    
+                    pdf.click()
+                    
+                    self.wait(5)
+                    
+                    downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
+                    
+                    downloadButton.click()
+            
+            else:
+                raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI!")
         
-        if(len(pdfList) != 0):
-            print(str(len(pdfList)) + ' PDF(s) found... \n')
-            for pdf in pdfList:
-                
-                self.wait(10)
-                
-                pdf.click()
-                
-                self.wait(5)
-                
-                downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
-                
-                downloadButton.click()
-                
-        else:
-            print('No pdf documents found... \n')
+        except DocumentNotFoundException as dnf:
+            print(dnf)
     
     
     
@@ -509,9 +528,17 @@ class Whatsapp(webdriver.Chrome):
             
     def moveFilesToMainDirectory(self, path):
         
-        os.chdir(DOWNLOADS_PATH + "//" + WHATSAPP_FOLDER)
+        print('Sposto i file in ' + path)
+        
+        os.chdir(DOWNLOADS_PATH)
 
         for file in os.listdir():
-            shutil.move(file, path)
+            if(self.getExtension(file) in ACCEPTED_EXTENSION):
+                shutil.move(file, path)
             
         os.chdir(DIRECTORY_CALLBACK)
+        
+        
+        
+    def getExtension(self, fileName):
+        return (fileName.split("."))[1]

@@ -10,11 +10,14 @@ from datetime import datetime
 
 import os
 
+import shutil
+
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import ActionChains
 
 from whatsapp.constants import PATH_DRIVER_CHROME
 from whatsapp.constants import BASE_URL
@@ -42,10 +45,10 @@ from whatsapp.constants import XPATH_DOWNLOAD_AUDIOS
 from whatsapp.constants import XPATH_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
+from whatsapp.constants import DOWNLOADS_PATH
+from whatsapp.constants import XPATH_PDF_LIST
 
 import pandas as pd
-
-from selenium.webdriver import ActionChains
 
 class Whatsapp(webdriver.Chrome):
     
@@ -156,7 +159,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
         
-        self.wait(20) 
+        self.wait(10) 
         chats = self.getContacts()
         
         print('Prima di scrollare erano presenti: \n')
@@ -323,6 +326,7 @@ class Whatsapp(webdriver.Chrome):
     
     def downloadMedia(self):
         
+        self.downloadDocuments()
         self.downloadAudios()
         self.downloadImages()
         self.downloadVideos()
@@ -361,16 +365,15 @@ class Whatsapp(webdriver.Chrome):
     def downloadImages(self):
         
         images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
-        countImages = 0
+        
         if(len(images) != 0):
             print(str(len(images)) + ' image(s) found... \n')
             for image in images:
                 
                 self.wait(10)
                 
-                print('Waiting for image n. ' + str(countImages) + '... \n')
                 image.click()
-                print('Clicked! \n')
+
                 self.wait(3)
                 
                 downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
@@ -412,6 +415,31 @@ class Whatsapp(webdriver.Chrome):
                 closeButton.click()
         else:
             print('No videos found... \n')
+            
+            
+            
+    def downloadDocuments(self):
+        
+        pdfList = self.find_elements(by=By.XPATH, value=XPATH_PDF_LIST)
+        
+        if(len(pdfList) != 0):
+            print(str(len(pdfList)) + ' PDF(s) found... \n')
+            for pdf in pdfList:
+                
+                self.wait(10)
+                
+                pdf.click()
+                
+                self.wait(5)
+                
+                downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
+                
+                downloadButton.click()
+                
+                self.wait(3)
+                
+        else:
+            print('No pdf documents found... \n')
     
     
     

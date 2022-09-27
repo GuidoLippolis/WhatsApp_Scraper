@@ -82,3 +82,6 @@ XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS = '//button//span[contains(@data-testid,"dow
 
 # XPath unarchive button
 XPATH_UNARCHIVE_BUTTON = '//li[contains(@data-testid, "mi-archive")]'
+
+# XPath PDF list
+XPATH_PDF_LIST = '//button[contains(@data-testid,"document-thumb")]'

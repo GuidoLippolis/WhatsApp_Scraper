@@ -47,6 +47,7 @@ from whatsapp.constants import XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
 from whatsapp.constants import DOWNLOADS_PATH
 from whatsapp.constants import XPATH_PDF_LIST
+from whatsapp.constants import WHATSAPP_FOLDER
 
 import pandas as pd
 
@@ -54,6 +55,10 @@ class Whatsapp(webdriver.Chrome):
     
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
         self.driver_path = driver_path
+        os.chdir(DOWNLOADS_PATH)
+        if not os.path.exists(DOWNLOADS_PATH + "//" + WHATSAPP_FOLDER):
+            os.mkdir(WHATSAPP_FOLDER)
+        os.chdir(DIRECTORY_CALLBACK)
         super(Whatsapp, self).__init__()
         
         
@@ -138,6 +143,8 @@ class Whatsapp(webdriver.Chrome):
     
     def findChatToScrap(self):
         
+        os.chdir(DIRECTORY_CALLBACK)
+        
         unarchiveChatsCheckbox = False
         downloadMediaCheckbox = True
         
@@ -159,7 +166,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
         
-        self.wait(10) 
+        self.wait(20) 
         chats = self.getContacts()
         
         print('Prima di scrollare erano presenti: \n')
@@ -180,6 +187,7 @@ class Whatsapp(webdriver.Chrome):
                 
                 if(downloadMediaCheckbox == True):
                     self.downloadMedia()
+                    self.moveFilesToMainDirectory(path + "//" + contactName)
                 
             else:
                 
@@ -216,6 +224,7 @@ class Whatsapp(webdriver.Chrome):
                                 
                                 if(downloadMediaCheckbox == True):
                                     self.downloadMedia()
+                                    self.moveFilesToMainDirectory(path + "//" + contactName)
                                 
                                 break
                             
@@ -331,6 +340,7 @@ class Whatsapp(webdriver.Chrome):
         self.downloadImages()
         self.downloadVideos()
     
+    
 
     def downloadAudios(self):
         
@@ -436,8 +446,6 @@ class Whatsapp(webdriver.Chrome):
                 
                 downloadButton.click()
                 
-                self.wait(3)
-                
         else:
             print('No pdf documents found... \n')
     
@@ -496,3 +504,14 @@ class Whatsapp(webdriver.Chrome):
         for i in range(1, seconds+1):
             time.sleep(1)
             print(str(i) + '... \n')
+            
+            
+            
+    def moveFilesToMainDirectory(self, path):
+        
+        os.chdir(DOWNLOADS_PATH + "//" + WHATSAPP_FOLDER)
+
+        for file in os.listdir():
+            shutil.move(file, path)
+            
+        os.chdir(DIRECTORY_CALLBACK)

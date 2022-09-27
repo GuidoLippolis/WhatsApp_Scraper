@@ -91,7 +91,7 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def testArchivedChats(self):
+    def unarchiveChats(self):
         
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)

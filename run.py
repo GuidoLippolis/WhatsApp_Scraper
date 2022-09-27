@@ -14,4 +14,4 @@ from app import App
 
 
 inst = Whatsapp()
-inst.testArchivedChats()
+inst.findChatToScrap()

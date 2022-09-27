@@ -129,7 +129,9 @@ class Whatsapp(webdriver.Chrome):
                 unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
                 unarchiveButton.click()
         
-
+        return unarchivedContacts
+    
+    
     
     def findChatToScrap(self):
         

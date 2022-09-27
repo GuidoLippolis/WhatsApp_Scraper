@@ -4,8 +4,6 @@ Created on Sun Sep  4 12:10:34 2022
 @author: guido
 """
 
-import collections
-
 import time
 
 from datetime import datetime
@@ -21,6 +19,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from whatsapp.constants import PATH_DRIVER_CHROME
 from whatsapp.constants import BASE_URL
 from whatsapp.constants import CHAT_LIST_CONTAINER
+from whatsapp.constants import XPATH_RECENT_CHATS
 from whatsapp.constants import ARCHIVED_CHATS_BUTTON
 from whatsapp.constants import CHAT_SECTION_HTML_ID
 from whatsapp.constants import XPATH_TEXT_MESSAGES_CONTAINERS
@@ -40,10 +39,11 @@ from whatsapp.constants import XPATH_IMAGES
 from whatsapp.constants import XPATH_AUDIOS
 from whatsapp.constants import XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS
 from whatsapp.constants import XPATH_DOWNLOAD_AUDIOS
+from whatsapp.constants import XPATH_ARCHIVED_CHATS
+from whatsapp.constants import XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS
+from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
 
 import pandas as pd
-
-from selenium.common.exceptions import ElementNotVisibleException
 
 from selenium.webdriver import ActionChains
 
@@ -58,7 +58,7 @@ class Whatsapp(webdriver.Chrome):
     def getContacts(self):
         self.implicitly_wait(150)
         recentList = self.find_element(by=By.XPATH, value=CHAT_LIST_CONTAINER)
-        return recentList.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
+        return recentList.find_elements(by=By.XPATH, value=XPATH_RECENT_CHATS)
     
     
     
@@ -102,14 +102,6 @@ class Whatsapp(webdriver.Chrome):
     
     def testArchivedChats(self):
         
-        contactsInHome = []
-        unarchivedContactNames = []
-        
-        pixels = 0
-        pre_height = 0
-        new_height = 0
-        nScrolls = 0
-        
         self.get(BASE_URL)
         self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
         
@@ -118,7 +110,7 @@ class Whatsapp(webdriver.Chrome):
         
         self.wait(10)
         
-        archivedChats = self.find_elements(by=By.XPATH, value='//div[contains(@class,"_3uIPm WYyr1") and not(contains(@aria-label,"Lista"))]//span[contains(@dir,"auto")]')
+        archivedChats = self.find_elements(by=By.XPATH, value=XPATH_ARCHIVED_CHATS)
         
         countArchivedChats = 0
         
@@ -128,104 +120,12 @@ class Whatsapp(webdriver.Chrome):
             self.wait(5)
             a = ActionChains(self)
             a.move_to_element(chat).perform()
-            dropDownArchivedChatButton = self.find_element(by=By.XPATH, value='//button//span[contains(@data-testid,"down")]')
+            dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
             dropDownArchivedChatButton.click()
             self.wait(5)
-            unarchiveButton = self.find_element(by=By.XPATH, value='//li[contains(@data-testid, "mi-archive")]')
+            unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
             unarchiveButton.click()
             self.wait(5)
-        
-        # time.sleep(1)
-        # chats = self.getContacts()
-        
-        # print('Prima di scrollare erano presenti: \n')
-        # chatsAsStrings = self.fillNameList(chats)
-        # print(chatsAsStrings)
-        
-        # for c in chatsAsStrings:
-        #     contactsInHome.append(c)
-        
-        # while True:
-        #     updatedList = []
-        #     nScrolls += 1
-        #     print('Scroll n. ' + str(nScrolls) + '... \n')
-        #     pixels += PIXELS_TO_SCROLL
-        #     self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
-        #     new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-            
-        #     while True:
-                
-        #         try:
-        #             self.implicitly_wait(200)
-        #             time.sleep(1)
-        #             scrolledChats = self.getContacts()
-                            
-        #             updatedList = self.updateList(chats, scrolledChats)
-                            
-        #             scrolledChatsAsStrings = self.fillNameList(updatedList)
-                    
-        #             print('Dopo lo scroll n.' + str(nScrolls) + ' ci sono: \n')
-        #             print(scrolledChatsAsStrings)
-                    
-        #             break
-                    
-        #         except:
-        #             self.implicitly_wait(0.5)
-                    
-        #     for c in scrolledChatsAsStrings:
-        #         contactsInHome.append(c)
-                
-        #     if(pre_height < new_height):
-        #         pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-        #     else:
-        #         break
-        
-        # contactsInHome = list(dict.fromkeys(contactsInHome))    
-        
-        # print('Nella home sono stati trovati ' + str(len(contactsInHome)) + ' contatti \n')
-        # print(contactsInHome)
-    
-        # archivedChatsButton = self.find_element(by=By.XPATH, value=ARCHIVED_CHATS_BUTTON)
-        # archivedChatsButton.click()
-        
-        # print('Retrieving archived contacts... \n')
-        
-        # archivedContacts = self.getContacts()
-        # archivedContactsAsStrings = self.fillNameList(archivedContacts)
-        
-        # archivedChatsWebElementContainer = self.find_element(by=By.XPATH, value='//div[contains(@class,"_3uIPm WYyr1") and not(contains(@aria-label,"Lista"))]')
-        
-        # archivedChatsWebElements = archivedChatsWebElementContainer.find_elements(by=By.XPATH, value='//span[contains(@dir,"auto")]')
-        
-        # print('Chat archiviate: \n')
-        
-        # for c in archivedChatsWebElements:
-        #     print(c.get_attribute('title'))
-        
-        # print('Fine chat archiviate \n')
-        
-        # for archivedContact in archivedContacts:
-        #     if(archivedContact.get_attribute('title') not in contactsInHome):
-        #         flag = False
-        #         while True:
-        #             try:
-        #                 countArchivedChats += 1
-        #                 unarchivedContactNames.append(archivedContact.get_attribute('title'))
-        #                 print('Unarchiving chat n. ' + str(countArchivedChats) + ': ' + archivedContact.get_attribute('title'))
-        #                 self.wait(5)
-        #                 a = ActionChains(self)
-        #                 a.move_to_element(archivedContact).perform()
-        #                 self.waitForElementToAppear(500, '//button//span[contains(@data-testid,"down")]')
-        #                 dropDownArchivedChatButton = self.find_element(by=By.XPATH, value='//button//span[contains(@data-testid,"down")]')
-        #                 dropDownArchivedChatButton.click()
-        #                 self.waitForElementToAppear(500, '//li[contains(@data-testid, "mi-archive")]')
-                        # unarchiveButton = self.find_element(by=By.XPATH, value='//li[contains(@data-testid, "mi-archive")]')
-                        # unarchiveButton.click()
-        #                 print('Unarchived contact: ' + archivedContact.get_attribute('title'))
-        #                 self.wait(5)
-                        
-        #             except:
-        #                 self.implicitly_wait(20)
         
 
     

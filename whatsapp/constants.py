@@ -14,6 +14,9 @@ CHAT_LIST_CONTAINER = '//*[@id="pane-side"]/div[2]/div/div'
 # HTML id value of CHAT_MESSAGES_CONTAINER
 CHAT_SECTION_HTML_ID = 'pane-side'
 
+# XPath for recent chats in recent list
+XPATH_RECENT_CHATS = '//span[contains(@dir,"auto")]'
+
 # Button to get archived chats
 ARCHIVED_CHATS_BUTTON = '//*[@id="pane-side"]/button/div/div[2]/div/div'
 
@@ -70,3 +73,12 @@ XPATH_DOWNLOAD_AUDIOS = "//span//li[contains(@data-testid, 'mi-msg-download')]"
 
 # Path to Downloads folder in Windows
 DOWNLOADS_PATH = "C://Users//guido//Downloads"
+
+# XPath archived chats
+XPATH_ARCHIVED_CHATS = '//div[contains(@class,"_3uIPm WYyr1") and not(contains(@aria-label,"Lista"))]//span[contains(@dir,"auto")]'
+
+# XPath drop down menu for archived chats
+XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS = '//button//span[contains(@data-testid,"down")]'
+
+# XPath unarchive button
+XPATH_UNARCHIVE_BUTTON = '//li[contains(@data-testid, "mi-archive")]'

@@ -86,8 +86,5 @@ XPATH_UNARCHIVE_BUTTON = '//li[contains(@data-testid, "mi-archive")]'
 # XPath PDF list
 XPATH_PDF_LIST = '//button[contains(@data-testid,"document-thumb")]'
 
-# WhatsApp folder in Downloads
-WHATSAPP_FOLDER = "Whatsapp_Scraper"
-
 # Accepted extensions
 ACCEPTED_EXTENSION = ["ogg", "mp4", "png", "mp3", "pdf"]

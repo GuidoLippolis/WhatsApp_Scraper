@@ -71,19 +71,10 @@ class Whatsapp(webdriver.Chrome):
         
     def searchContactToClick(self, contacts, contactToSearch):
         
-        print('Sono in searchContactToClick \n')
-        print('Devo cercare tra ' + str(len(contacts)) + ' contatti se è presente ' + contactToSearch)
-        
-        # count = 0
-        
         for contact in contacts:
             name = contact.get_attribute('title')
             if(len(name) != 0):
-                # count += 1
-                # print('Confronto con il contatto n. ' + str(count) + '\n')
-                # print('Contact = ' + name)
                 if(name == contactToSearch):
-                    # print('TROVATO! \n')
                     contact.click()
                     return True
                 

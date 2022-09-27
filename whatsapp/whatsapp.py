@@ -47,7 +47,6 @@ from whatsapp.constants import XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
 from whatsapp.constants import DOWNLOADS_PATH
 from whatsapp.constants import XPATH_PDF_LIST
-from whatsapp.constants import WHATSAPP_FOLDER
 from whatsapp.constants import ACCEPTED_EXTENSION
 
 import pandas as pd
@@ -55,7 +54,7 @@ import pandas as pd
 from whatsapp.exceptions.exceptions import ImageNotFoundException
 from whatsapp.exceptions.exceptions import VideoNotFoundException
 from whatsapp.exceptions.exceptions import AudioNotFoundException
-from whatsapp.exceptions.exceptions import DocumentNotFoundException
+from whatsapp.exceptions import DocumentNotFoundException
 
 class Whatsapp(webdriver.Chrome):
     

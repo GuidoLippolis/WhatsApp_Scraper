@@ -133,10 +133,16 @@ class Whatsapp(webdriver.Chrome):
     
     def findChatToScrap(self):
         
+        unarchiveChatsCheckbox = False
+        downloadMediaCheckbox = False
+        
         timestamp = self.getTimeStamp();
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
         
         print("Ho creato la cartella: " + SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        
+        if(unarchiveChatsCheckbox == True):
+            self.unarchiveChats()
         
         endOfSearch = False
         
@@ -166,6 +172,10 @@ class Whatsapp(webdriver.Chrome):
                 print('Contatto trovato senza scrollare \n')
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                 self.getConversation(path, contactName)
+                
+                if(downloadMediaCheckbox == True):
+                    self.downloadMedia()
+                
             else:
                 
                 while True:
@@ -198,6 +208,10 @@ class Whatsapp(webdriver.Chrome):
                                 endOfSearch = True
                                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                                 self.getConversation(path, contactName)
+                                
+                                if(downloadMediaCheckbox == True):
+                                    self.downloadMedia()
+                                
                                 break
                             
                             break
@@ -298,7 +312,14 @@ class Whatsapp(webdriver.Chrome):
             
         return finalDict
      
-
+    
+    
+    def downloadMedia(self):
+        
+        self.downloadImages()
+        self.downloadAudios()
+        self.downloadVideos()
+    
 
     def downloadAudios(self):
         

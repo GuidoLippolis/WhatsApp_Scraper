@@ -51,9 +51,9 @@ from whatsapp.constants import ACCEPTED_EXTENSION
 
 import pandas as pd
 
-from whatsapp.exceptions.exceptions import ImageNotFoundException
-from whatsapp.exceptions.exceptions import VideoNotFoundException
-from whatsapp.exceptions.exceptions import AudioNotFoundException
+from whatsapp.exceptions import ImageNotFoundException
+from whatsapp.exceptions import VideoNotFoundException
+from whatsapp.exceptions import AudioNotFoundException
 from whatsapp.exceptions import DocumentNotFoundException
 
 class Whatsapp(webdriver.Chrome):
@@ -187,8 +187,10 @@ class Whatsapp(webdriver.Chrome):
                 self.getConversation(path, contactName)
                 
                 if(downloadMediaCheckbox == True):
+                    os.chdir(DIRECTORY_CALLBACK)
                     self.downloadMedia()
-                    # self.moveFilesToMainDirectory(path + "//" + contactName + "//")
+                    print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                    self.moveFilesToMainDirectory(path + "/" + contactName)
                 
             else:
                 
@@ -224,8 +226,10 @@ class Whatsapp(webdriver.Chrome):
                                 self.getConversation(path, contactName)
                                 
                                 if(downloadMediaCheckbox == True):
+                                    os.chdir(DIRECTORY_CALLBACK)
                                     self.downloadMedia()
-                                    # self.moveFilesToMainDirectory(path + "//" + contactName + "//")
+                                    print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                                    self.moveFilesToMainDirectory(path + "//" + contactName + "//")
                                 
                                 break
                             
@@ -336,12 +340,12 @@ class Whatsapp(webdriver.Chrome):
     
     def downloadMedia(self):
         
-        self.downloadDocuments()
         self.downloadAudios()
-        self.downloadImages()
-        self.downloadVideos()
+        # self.downloadImages()
+        # self.downloadVideos()
+        # self.downloadDocuments()
     
-    
+
 
     def downloadAudios(self):
         
@@ -462,7 +466,7 @@ class Whatsapp(webdriver.Chrome):
                     downloadButton.click()
             
             else:
-                raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI!")
+                raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI! \n")
         
         except DocumentNotFoundException as dnf:
             print(dnf)
@@ -531,9 +535,19 @@ class Whatsapp(webdriver.Chrome):
         
         os.chdir(DOWNLOADS_PATH)
 
-        for file in os.listdir():
-            if(self.getExtension(file) in ACCEPTED_EXTENSION):
-                shutil.move(file, path)
+        for fileName in os.listdir():
+            
+            if(fileName.endswith(".ogg")):
+                print('Sono sul file ' + fileName + '... \n')
+                newFilename = fileName.split(".ogg")[0]
+                newFilename = (newFilename).replace(".","_")
+                newFilename += ".ogg"
+                
+                if(self.getExtension(newFilename) in ACCEPTED_EXTENSION):
+                    shutil.move(fileName, path)
+                    
+                os.chdir(DOWNLOADS_PATH)
+            
             
         os.chdir(DIRECTORY_CALLBACK)
         

@@ -185,7 +185,7 @@ class Whatsapp(webdriver.Chrome):
             
                     print('Cercando ' + contactName + '... \n')
                     
-                    # self.wait(20)
+                    # self.wait(10)
                     chats = self.getContacts()
                     
                     print('Prima di scrollare erano presenti: \n')

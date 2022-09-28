@@ -87,12 +87,11 @@ class Whatsapp(webdriver.Chrome):
         
         for contact in contacts:
             name = contact.get_attribute('title')
-            if(len(name) != 0):
-                if(name == contactToSearch):
-                    contact.click()
-                    return True
-                
-                
+            if(len(name) != 0 and name == contactToSearch):
+                contact.click()
+                return True
+            
+            
                 
     def fillNameList(self, spanList):
         nameList = []
@@ -152,7 +151,7 @@ class Whatsapp(webdriver.Chrome):
     def findChatToScrap(self):
         
         unarchiveChatsCheckbox = False
-        downloadMediaCheckbox = True
+        downloadMediaCheckbox = False
         
         timestamp = self.getTimeStamp();
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
@@ -173,13 +172,7 @@ class Whatsapp(webdriver.Chrome):
         new_height = 0
         nScrolls = 0
         
-        self.wait(20) 
-        chats = self.getContacts()
-        
-        print('Prima di scrollare erano presenti: \n')
-        chatsAsStrings = self.fillNameList(chats)
-        print(chatsAsStrings)
-        
+        scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
         try:
             
@@ -191,6 +184,13 @@ class Whatsapp(webdriver.Chrome):
                 for contactName in contactNamesFromCSV:
             
                     print('Cercando ' + contactName + '... \n')
+                    
+                    # self.wait(20)
+                    chats = self.getContacts()
+                    
+                    print('Prima di scrollare erano presenti: \n')
+                    chatsAsStrings = self.fillNameList(chats)
+                    print(chatsAsStrings)
                     
                     contactFound = self.searchContactToClick(chats, contactName)
                     if(contactFound == True):
@@ -236,12 +236,14 @@ class Whatsapp(webdriver.Chrome):
                                         endOfSearch = True
                                         path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                                         self.getConversation(path, contactName)
-                                        
+                                        self.execute_script(scriptGoBack)
+                                    
                                         if(downloadMediaCheckbox == True):
                                             os.chdir(DIRECTORY_CALLBACK)
                                             self.downloadMedia()
                                             print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                                            self.moveFilesToMainDirectory(path + "//" + contactName + "//")
+                                            self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                                            self.execute_script(scriptGoBack)
                                         
                                         break
                                     

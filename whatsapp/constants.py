@@ -45,7 +45,7 @@ TIMESTAMP_FORMAT = "%H:%M:%S%f"
 DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
 
 # Number of pixels to scroll
-PIXELS_TO_SCROLL = 1000
+PIXELS_TO_SCROLL = 250
 
 # XPath identifier for video play button
 VIDEO_PLAY_BUTTON_XPATH = "//div//span[contains(@data-testid,'media-play')]"

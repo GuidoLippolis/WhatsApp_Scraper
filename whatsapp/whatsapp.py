@@ -55,6 +55,9 @@ from whatsapp.exceptions.ImageNotFoundException import ImageNotFoundException
 from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
 from whatsapp.exceptions.AudioNotFoundException import AudioNotFoundException
 from whatsapp.exceptions.DocumentNotFoundException import DocumentNotFoundException
+from whatsapp.exceptions.ArchivedChatsNotFoundException import ArchivedChatsNotFoundException
+from whatsapp.exceptions.EmptyContactsFileException import EmptyContactsFileException
+from whatsapp.exceptions.EmptyChatException import EmptyChatException
 
 class Whatsapp(webdriver.Chrome):
     
@@ -112,7 +115,16 @@ class Whatsapp(webdriver.Chrome):
         
         self.wait(15)
         
-        archivedChats = self.find_elements(by=By.XPATH, value=XPATH_ARCHIVED_CHATS)
+        
+        try:
+            
+            archivedChats = self.find_elements(by=By.XPATH, value=XPATH_ARCHIVED_CHATS)
+            
+            if(len(archivedChats) == 0):
+                raise ArchivedChatsNotFoundException("ERRORE! NON SONO STATE TROVATE CHAT ARCHIVIATE! \n")
+                
+        except ArchivedChatsNotFoundException as acnf:
+            print(acnf)
         
         archivedChats2 = []
         
@@ -121,20 +133,14 @@ class Whatsapp(webdriver.Chrome):
                 archivedChats2.append(a)
 
         for chat in archivedChats2:
-            print('Stampo il nome della chat \n')
             if(chat.is_displayed()):
                 unarchivedContacts.append(chat.get_attribute('title'))
-                print('Unarchiving contact ' + chat.get_attribute('title') + '... \n')
                 self.wait(5)
-                a = ActionChains(self)
-                print('a.move_to_element(chat).perform() \n')
-                a.move_to_element(chat).perform()
+                ActionChains(self).move_to_element(chat).perform()
                 self.wait(1)
-                print('Recupero il bottone drop down \n')
                 dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
                 dropDownArchivedChatButton.click()
                 self.wait(1)
-                print('Recupero il bottone unarchive \n')
                 unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
                 unarchiveButton.click()
         
@@ -174,7 +180,16 @@ class Whatsapp(webdriver.Chrome):
         chatsAsStrings = self.fillNameList(chats)
         print(chatsAsStrings)
         
-        contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
+        
+        try:
+            
+            contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
+            
+            if(len(contactNamesFromCSV) == 0):
+                raise EmptyContactsFileException("ERRORE! IL FILE CSV DEI CONTATTI E' VUOTO! \n")
+            
+        except EmptyContactsFileException as ecf:
+            print(ecf)
         
         for contactName in contactNamesFromCSV:
             
@@ -259,11 +274,18 @@ class Whatsapp(webdriver.Chrome):
         
         messageMetadataList = []
         
-        # Retrieving all divs containing text messages
-        messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
-        
-        # Retrieving text messages
-        textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
+        try:
+            # Retrieving all divs containing text messages
+            messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
+            
+            # Retrieving text messages
+            textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
+            
+            if(len(messages) == 0):
+                raise EmptyChatException("ERRORE! LA CHAT CON IL CONTATTO " + contactName + " E' VUOTA! \n")
+            
+        except EmptyChatException as ecf:
+            print(ecf)
         
         print('Found ' + str(len(textMessages)) + ' messages... \n')
         print('Started scraping messages... \n')

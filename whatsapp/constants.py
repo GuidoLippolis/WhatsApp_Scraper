@@ -87,4 +87,4 @@ XPATH_UNARCHIVE_BUTTON = '//li[contains(@data-testid, "mi-archive")]'
 XPATH_PDF_LIST = '//button[contains(@data-testid,"document-thumb")]'
 
 # Accepted extensions
-ACCEPTED_EXTENSION = ["ogg", "mp4", "png", "mp3", "pdf"]
+ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".mp3", ".pdf"]

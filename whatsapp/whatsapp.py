@@ -10,6 +10,8 @@ from datetime import datetime
 
 import os
 
+import pathlib
+
 import shutil
 
 from selenium import webdriver
@@ -47,7 +49,7 @@ from whatsapp.constants import XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
 from whatsapp.constants import DOWNLOADS_PATH
 from whatsapp.constants import XPATH_PDF_LIST
-from whatsapp.constants import ACCEPTED_EXTENSION
+from whatsapp.constants import ACCEPTED_EXTENSIONS
 
 import pandas as pd
 
@@ -565,15 +567,10 @@ class Whatsapp(webdriver.Chrome):
                 newFilename = (newFilename).replace(".","_")
                 newFilename += ".ogg"
                 
-                if(self.getExtension(newFilename) in ACCEPTED_EXTENSION):
+                if(pathlib.Path(newFilename).suffix in ACCEPTED_EXTENSIONS):
                     shutil.move(fileName, path)
                     
                 os.chdir(DOWNLOADS_PATH)
             
             
         os.chdir(DIRECTORY_CALLBACK)
-        
-        
-        
-    def getExtension(self, fileName):
-        return (fileName.split("."))[1]

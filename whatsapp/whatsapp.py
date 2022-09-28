@@ -117,7 +117,7 @@ class Whatsapp(webdriver.Chrome):
                 self.wait(5)
                 self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
                 
-                archivedChatsButton.click()
+                archivedChatsButton[0].click()
                 
                 self.wait(20)
         
@@ -151,7 +151,7 @@ class Whatsapp(webdriver.Chrome):
     
     def findChatToScrap(self):
         
-        unarchiveChatsCheckbox = True
+        unarchiveChatsCheckbox = False
         downloadMediaCheckbox = True
         
         timestamp = self.getTimeStamp();
@@ -201,9 +201,8 @@ class Whatsapp(webdriver.Chrome):
                         if(downloadMediaCheckbox == True):
                             os.chdir(DIRECTORY_CALLBACK)
                             self.downloadMedia()
-                            print('### MEDIA SCARICATI ###')
                             print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                            self.moveFilesToMainDirectory(path + "/" + contactName)
+                            self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                         
                     else:
                         
@@ -475,10 +474,6 @@ class Whatsapp(webdriver.Chrome):
                     
                     self.wait(5)
                     
-                    downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
-                    
-                    downloadButton.click()
-            
             else:
                 raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI! \n")
         
@@ -543,24 +538,24 @@ class Whatsapp(webdriver.Chrome):
             
             
             
-    def moveFilesToMainDirectory(self, path):
+    def moveFilesToMainDirectory(self, destinationPath):
         
-        print('Sposto i file in ' + path)
+        print('Sposto i file in ' + destinationPath)
         
         os.chdir(DOWNLOADS_PATH)
 
         for fileName in os.listdir():
             
-            if(fileName.endswith(".ogg")):
-                print('Sono sul file ' + fileName + '... \n')
-                newFilename = fileName.split(".ogg")[0]
-                newFilename = (newFilename).replace(".","_")
-                newFilename += ".ogg"
-                
-                if(pathlib.Path(newFilename).suffix in ACCEPTED_EXTENSIONS):
-                    shutil.move(fileName, path)
-                    
-                os.chdir(DOWNLOADS_PATH)
+            if(pathlib.Path(self.fixFileName(fileName)).suffix in ACCEPTED_EXTENSIONS):
+                    shutil.move(fileName, destinationPath)
+                    os.chdir(DOWNLOADS_PATH)
             
             
         os.chdir(DIRECTORY_CALLBACK)
+        
+        
+        
+    def fixFileName(self, fileName):
+        newFileName = ((fileName.split(".ogg")[0]).replace(".","_"))
+        newFileName += (pathlib.Path(fileName).suffix)
+        return newFileName

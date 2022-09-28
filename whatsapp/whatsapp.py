@@ -151,7 +151,7 @@ class Whatsapp(webdriver.Chrome):
     def findChatToScrap(self):
         
         unarchiveChatsCheckbox = False
-        downloadMediaCheckbox = False
+        downloadMediaCheckbox = True
         
         timestamp = self.getTimeStamp();
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
@@ -185,7 +185,7 @@ class Whatsapp(webdriver.Chrome):
             
                     print('Cercando ' + contactName + '... \n')
                     
-                    # self.wait(10)
+                    self.wait(10)
                     chats = self.getContacts()
                     
                     print('Prima di scrollare erano presenti: \n')
@@ -217,7 +217,7 @@ class Whatsapp(webdriver.Chrome):
                             while True:
                                 try:
                                     self.implicitly_wait(200)
-                                    time.sleep(1)
+                                    time.sleep(10)
                                     scrolledChats = self.getContacts()
                                     
                                     updatedList = self.updateList(chats, scrolledChats)
@@ -375,6 +375,8 @@ class Whatsapp(webdriver.Chrome):
                 print(str(len(audios)) + ' audio(s) found... \n')
                 for audio in audios:
                     
+                    self.wait(3)
+
                     ActionChains(self).move_to_element(audio).perform()
                     
                     dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
@@ -486,10 +488,9 @@ class Whatsapp(webdriver.Chrome):
     
     def makeCSV(self, data, pathToCSV, contactName):
         
-        print('Creating folder ' + contactName + '... \n')
-        
         os.chdir(pathToCSV)
         if not os.path.exists(contactName):
+            print('Creating folder ' + contactName + '... \n')
             os.mkdir(contactName)
         os.chdir(contactName)
         

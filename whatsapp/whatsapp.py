@@ -51,10 +51,10 @@ from whatsapp.constants import ACCEPTED_EXTENSION
 
 import pandas as pd
 
-from whatsapp.exceptions import ImageNotFoundException
-from whatsapp.exceptions import VideoNotFoundException
-from whatsapp.exceptions import AudioNotFoundException
-from whatsapp.exceptions import DocumentNotFoundException
+from whatsapp.exceptions.ImageNotFoundException import ImageNotFoundException
+from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
+from whatsapp.exceptions.AudioNotFoundException import AudioNotFoundException
+from whatsapp.exceptions.DocumentNotFoundException import DocumentNotFoundException
 
 class Whatsapp(webdriver.Chrome):
     
@@ -341,9 +341,9 @@ class Whatsapp(webdriver.Chrome):
     def downloadMedia(self):
         
         self.downloadAudios()
-        # self.downloadImages()
-        # self.downloadVideos()
-        # self.downloadDocuments()
+        self.downloadImages()
+        self.downloadVideos()
+        self.downloadDocuments()
     
 
 

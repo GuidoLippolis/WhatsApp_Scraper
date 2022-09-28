@@ -88,3 +88,6 @@ XPATH_PDF_LIST = '//button[contains(@data-testid,"document-thumb")]'
 
 # Accepted extensions
 ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".mp3", ".pdf"]
+
+# Chat filter button
+XPATH_CHAT_FILTER_BUTTON = '//span[contains(@data-testid,"filter")]'

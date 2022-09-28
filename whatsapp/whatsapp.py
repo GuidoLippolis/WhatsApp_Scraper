@@ -111,38 +111,38 @@ class Whatsapp(webdriver.Chrome):
         archivedChatsButton = self.find_element(by=By.XPATH, value=ARCHIVED_CHATS_BUTTON)
         archivedChatsButton.click()
         
-        unarchivedContacts = []
-        
         self.wait(15)
         
         
         try:
             
+            unarchivedContacts = []
+            archivedChats2 = []
+            
             archivedChats = self.find_elements(by=By.XPATH, value=XPATH_ARCHIVED_CHATS)
             
             if(len(archivedChats) == 0):
                 raise ArchivedChatsNotFoundException("ERRORE! NON SONO STATE TROVATE CHAT ARCHIVIATE! \n")
+            else:
+                for a in archivedChats:
+                    if(len(a.get_attribute('title')) != 0):
+                        archivedChats2.append(a)
+        
+                for chat in archivedChats2:
+                    if(chat.is_displayed()):
+                        unarchivedContacts.append(chat.get_attribute('title'))
+                        self.wait(5)
+                        ActionChains(self).move_to_element(chat).perform()
+                        self.wait(1)
+                        dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
+                        dropDownArchivedChatButton.click()
+                        self.wait(1)
+                        unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
+                        unarchiveButton.click()
+                
                 
         except ArchivedChatsNotFoundException as acnf:
             print(acnf)
-        
-        archivedChats2 = []
-        
-        for a in archivedChats:
-            if(len(a.get_attribute('title')) != 0):
-                archivedChats2.append(a)
-
-        for chat in archivedChats2:
-            if(chat.is_displayed()):
-                unarchivedContacts.append(chat.get_attribute('title'))
-                self.wait(5)
-                ActionChains(self).move_to_element(chat).perform()
-                self.wait(1)
-                dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
-                dropDownArchivedChatButton.click()
-                self.wait(1)
-                unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
-                unarchiveButton.click()
         
         return unarchivedContacts
     

@@ -278,63 +278,57 @@ class Whatsapp(webdriver.Chrome):
         print('Getting conversation with ' + contactName + '... \n')
         
         messageMetadataList = []
+        # Retrieving all divs containing text messages
+        messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
         
-        try:
-            # Retrieving all divs containing text messages
-            messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
-            
-            # Retrieving text messages
-            textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
-            
-            if(len(messages) == 0):
-                raise EmptyChatException("ERRORE! LA CHAT CON IL CONTATTO " + contactName + " E' VUOTA! \n")
-            
-        except EmptyChatException as ecf:
-            print(ecf)
+        # Retrieving text messages
+        textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
         
-        print('Found ' + str(len(textMessages)) + ' messages... \n')
-        print('Started scraping messages... \n')
-        countMessages = 0
+        if(len(messages) == 0):
+            raise EmptyChatException("ERRORE! LA CHAT CON IL CONTATTO " + contactName + " E' VUOTA! \n")
+        else:
+            print('Found ' + str(len(textMessages)) + ' messages... \n')
+            print('Started scraping messages... \n')
+            countMessages = 0
+            
+            for message in messages:
+                countMessages += 1
+                print('Scraping message n. ' + str(countMessages) + '... \n')
+                
+                # Getting metadata for every message (sender, date and hour)
+                metadata = message.find_element(
+                    by=By.XPATH,    
+                    value=XPATH_SENDER
+                ).get_attribute("data-pre-plain-text")
+                
+                print('Metadata for message n. ' + str(countMessages) + '... \n')
+                print(metadata)
+                
+                messageMetadataList.append(metadata)
+    
+            # Messages are sorted in descending order (if the last attribute is set to "True")
+            sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
+             
+            print('Sorted dictionary... \n')
+            
+            for row in sortedMetadataDict:
+                    # Getting back to the main directory
+                os.chdir(DIRECTORY_CALLBACK)
+                    # Filling a list where data to be written in the .csv file are passed as input
+                dataToAppend = []
+                dataToAppend.append([
+                        # Date
+                    (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
+                        # Hour
+                    (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
+                        # Sender
+                    row[1],
+                        # Message
+                    row[2]
+                ])
+                    # A .csv file named as the contact name the scraper is processing is created
+                self.makeCSV(dataToAppend[0], pathToCSV, contactName)
         
-        for message in messages:
-            countMessages += 1
-            print('Scraping message n. ' + str(countMessages) + '... \n')
-            
-            # Getting metadata for every message (sender, date and hour)
-            metadata = message.find_element(
-                by=By.XPATH,    
-                value=XPATH_SENDER
-            ).get_attribute("data-pre-plain-text")
-            
-            print('Metadata for message n. ' + str(countMessages) + '... \n')
-            print(metadata)
-            
-            messageMetadataList.append(metadata)
-
-        # Messages are sorted in descending order (if the last attribute is set to "True")
-        sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
-         
-        print('Sorted dictionary... \n')
-        
-        for row in sortedMetadataDict:
-                # Getting back to the main directory
-            os.chdir(DIRECTORY_CALLBACK)
-                # Filling a list where data to be written in the .csv file are passed as input
-            dataToAppend = []
-            dataToAppend.append([
-                    # Date
-                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
-                    # Hour
-                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
-                    # Sender
-                row[1],
-                    # Message
-                row[2]
-            ])
-                # A .csv file named as the contact name the scraper is processing is created
-            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
-            
-
     
     def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
         

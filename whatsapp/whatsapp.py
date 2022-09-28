@@ -58,12 +58,8 @@ from whatsapp.exceptions.ImageNotFoundException import ImageNotFoundException
 from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
 from whatsapp.exceptions.AudioNotFoundException import AudioNotFoundException
 from whatsapp.exceptions.DocumentNotFoundException import DocumentNotFoundException
-from whatsapp.exceptions.ArchivedChatsNotFoundException import ArchivedChatsNotFoundException
 from whatsapp.exceptions.EmptyContactsFileException import EmptyContactsFileException
-from whatsapp.exceptions.EmptyChatException import EmptyChatException
 from whatsapp.exceptions.ArchivedChatsButtonNotFoundException import ArchivedChatsButtonNotFoundException
-
-from selenium.common.exceptions import NoSuchElementException
 
 class Whatsapp(webdriver.Chrome):
     

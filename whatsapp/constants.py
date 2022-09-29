@@ -66,7 +66,8 @@ XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb')]"
 XPATH_AUDIOS = "//span[contains(@data-testid, 'audio-play')]"
 
 # XPath for drop down menu for downloading audios
-XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//span[contains(@data-testid, 'down-context')]"
+# XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//span[contains(@data-testid, 'down-context')]"
+XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//div[contains(@data-testid, 'icon-down-context')]"
 
 # XPath for downloading audios
 XPATH_DOWNLOAD_AUDIOS = "//span//li[contains(@data-testid, 'mi-msg-download')]"

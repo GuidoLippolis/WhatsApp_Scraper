@@ -14,6 +14,8 @@ import pathlib
 
 import shutil
 
+import zipfile
+
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -160,7 +162,7 @@ class Whatsapp(webdriver.Chrome):
         
         self.get(BASE_URL)
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
-        
+        self.maximize_window()
         
         if(unarchiveChatsCheckbox == True):
             archivedContacts = self.unarchiveChats()
@@ -185,7 +187,7 @@ class Whatsapp(webdriver.Chrome):
             
                     print('Cercando ' + contactName + '... \n')
                     
-                    self.wait(10)
+                    self.wait(20)
                     chats = self.getContacts()
                     
                     print('Prima di scrollare erano presenti: \n')
@@ -203,7 +205,7 @@ class Whatsapp(webdriver.Chrome):
                             self.downloadMedia()
                             print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
                             self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                        
+                            self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
                     else:
                         
                         while True:
@@ -217,7 +219,7 @@ class Whatsapp(webdriver.Chrome):
                             while True:
                                 try:
                                     self.implicitly_wait(200)
-                                    time.sleep(10)
+                                    self.wait(20)
                                     scrolledChats = self.getContacts()
                                     
                                     updatedList = self.updateList(chats, scrolledChats)
@@ -243,6 +245,7 @@ class Whatsapp(webdriver.Chrome):
                                             self.downloadMedia()
                                             print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
                                             self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                                            self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
                                             self.execute_script(scriptGoBack)
                                         
                                         break
@@ -375,9 +378,11 @@ class Whatsapp(webdriver.Chrome):
                 print(str(len(audios)) + ' audio(s) found... \n')
                 for audio in audios:
                     
-                    self.wait(3)
+                    self.wait(10)
 
                     ActionChains(self).move_to_element(audio).perform()
+                    
+                    self.wait(3)
                     
                     dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
                     
@@ -390,6 +395,7 @@ class Whatsapp(webdriver.Chrome):
                     downloadButton.click()
                     
                     self.wait(3)
+
             else:
                 raise AudioNotFoundException("ERRORE! AUDIO NON PRESENTI! \n")
                 
@@ -476,8 +482,6 @@ class Whatsapp(webdriver.Chrome):
                     
                     pdf.click()
                     
-                    self.wait(5)
-                    
             else:
                 raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI! \n")
         
@@ -546,19 +550,32 @@ class Whatsapp(webdriver.Chrome):
         print('Sposto i file in ' + destinationPath)
         
         os.chdir(DOWNLOADS_PATH)
-
-        for fileName in os.listdir():
-            
-            if(pathlib.Path(self.fixFileName(fileName)).suffix in ACCEPTED_EXTENSIONS):
-                    shutil.move(fileName, destinationPath)
-                    os.chdir(DOWNLOADS_PATH)
-            
+        
+        filesInDownloadsFolder = os.listdir()
+        filteredFiles = [i for i in filesInDownloadsFolder if any(i for j in ACCEPTED_EXTENSIONS if str(j) in i)]
+        
+        for fileName in filteredFiles:
+            newFileName = self.fixFileName(fileName)
+            print('######## newFileName = ' + newFileName + " ########")
+            if(pathlib.Path(newFileName).suffix in ACCEPTED_EXTENSIONS):
+                os.rename(fileName, newFileName)
+                shutil.move(newFileName, destinationPath)
             
         os.chdir(DIRECTORY_CALLBACK)
         
         
-        
+    
     def fixFileName(self, fileName):
-        newFileName = ((fileName.split(".ogg")[0]).replace(".","_"))
+        newFileName = fileName.split(pathlib.Path(fileName).suffix)
+        newFileName = newFileName[0]
+        newFileName = newFileName.replace(".","_")
         newFileName += (pathlib.Path(fileName).suffix)
         return newFileName
+    
+    
+    def zipFiles(self, path, contactName):
+        print('Sono nella funzione zipFiles()')
+        os.chdir(path)
+        with zipfile.ZipFile(contactName + ".zip", "w", compression=zipfile.ZIP_DEFLATED) as f:
+            for file in os.listdir():
+                f.write(file)

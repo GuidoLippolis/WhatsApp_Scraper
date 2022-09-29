@@ -16,6 +16,8 @@ import shutil
 
 import zipfile
 
+import hashlib
+
 from selenium import webdriver
 
 from selenium.webdriver.common.by import By
@@ -54,6 +56,7 @@ from whatsapp.constants import XPATH_PDF_LIST
 from whatsapp.constants import ACCEPTED_EXTENSIONS
 from whatsapp.constants import XPATH_CHAT_FILTER_BUTTON
 from whatsapp.constants import MULTIMEDIA_ZIP_NAME
+from whatsapp.constants import HASHING_CSV_FILE_NAME
 
 import pandas as pd
 
@@ -207,6 +210,7 @@ class Whatsapp(webdriver.Chrome):
                             print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
                             self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                             self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
+                            self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                     else:
                         
                         while True:
@@ -248,6 +252,7 @@ class Whatsapp(webdriver.Chrome):
                                             self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                                             self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
                                             self.execute_script(scriptGoBack)
+                                            self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                                         
                                         break
                                     
@@ -315,6 +320,7 @@ class Whatsapp(webdriver.Chrome):
             ])
                 # A .csv file named as the contact name the scraper is processing is created
             self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+    
         
     
     def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
@@ -359,7 +365,7 @@ class Whatsapp(webdriver.Chrome):
         
         print('Downloading audios... \n')
         
-        self.wait(10)
+        # self.wait(10)
         
         try:
             audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
@@ -436,7 +442,7 @@ class Whatsapp(webdriver.Chrome):
                     
                     playButton.click()
                     
-                    self.wait(5)
+                    self.wait(3)
                     
                     downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
                     
@@ -453,6 +459,7 @@ class Whatsapp(webdriver.Chrome):
         except VideoNotFoundException as vnf:
             print(vnf)
             
+           
             
     def downloadDocuments(self):
         
@@ -560,6 +567,7 @@ class Whatsapp(webdriver.Chrome):
         return newFileName
     
     
+    
     def zipFiles(self, path, contactName):
         os.chdir(path)
         # Zipping multimedia files
@@ -572,3 +580,25 @@ class Whatsapp(webdriver.Chrome):
             for file in os.listdir():
                 if(file == contactName + ".csv" and not file.endswith(".zip")):
                     f.write(file)
+                    
+                    
+                    
+    def zipHasher(self, path):
+        os.chdir(path)
+        
+        print('Creating file ' + HASHING_CSV_FILE_NAME + '... \n')
+                
+        for fileName in os.listdir():
+            
+            sha256 = hashlib.sha256()
+            md5 = hashlib.md5()
+            
+            if(fileName.endswith(".zip")):
+                print('Sono sul file ' + fileName + '... \n')
+                with open(fileName, "rb") as f:
+                    # Read and update hash string value in blocks of 4K
+                    for chunk in iter(lambda: f.read(4096), b""):
+                        sha256.update(chunk)
+                        md5.update(chunk)
+                    print('{}: {}'.format(sha256.name, sha256.hexdigest()))
+                    print('{}: {}'.format(md5.name, md5.hexdigest()))

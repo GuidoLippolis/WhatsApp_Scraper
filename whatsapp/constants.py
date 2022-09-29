@@ -95,3 +95,6 @@ XPATH_CHAT_FILTER_BUTTON = '//span[contains(@data-testid,"filter")]'
 
 # Multimedia zip name
 MULTIMEDIA_ZIP_NAME = "media"
+
+# Hashing .csv file
+HASHING_CSV_FILE_NAME = "hashing.csv"

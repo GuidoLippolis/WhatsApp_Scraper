@@ -92,3 +92,6 @@ ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf"]
 
 # Chat filter button
 XPATH_CHAT_FILTER_BUTTON = '//span[contains(@data-testid,"filter")]'
+
+# Multimedia zip name
+MULTIMEDIA_ZIP_NAME = "media"

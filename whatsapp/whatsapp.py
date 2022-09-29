@@ -53,6 +53,7 @@ from whatsapp.constants import DOWNLOADS_PATH
 from whatsapp.constants import XPATH_PDF_LIST
 from whatsapp.constants import ACCEPTED_EXTENSIONS
 from whatsapp.constants import XPATH_CHAT_FILTER_BUTTON
+from whatsapp.constants import MULTIMEDIA_ZIP_NAME
 
 import pandas as pd
 
@@ -161,8 +162,8 @@ class Whatsapp(webdriver.Chrome):
         print("Ho creato la cartella: " + SCRAPING_DIRECTORY_NAME + "_" + timestamp)
         
         self.get(BASE_URL)
-        self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
         self.maximize_window()
+        self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
         
         if(unarchiveChatsCheckbox == True):
             archivedContacts = self.unarchiveChats()
@@ -284,13 +285,7 @@ class Whatsapp(webdriver.Chrome):
         # Retrieving text messages
         textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
         
-        print('Found ' + str(len(textMessages)) + ' messages... \n')
-        print('Started scraping messages... \n')
-        countMessages = 0
-        
         for message in messages:
-            countMessages += 1
-            print('Scraping message n. ' + str(countMessages) + '... \n')
             
             # Getting metadata for every message (sender, date and hour)
             metadata = message.find_element(
@@ -298,16 +293,11 @@ class Whatsapp(webdriver.Chrome):
                 value=XPATH_SENDER
             ).get_attribute("data-pre-plain-text")
             
-            print('Metadata for message n. ' + str(countMessages) + '... \n')
-            print(metadata)
-            
             messageMetadataList.append(metadata)
 
         # Messages are sorted in descending order (if the last attribute is set to "True")
         sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
          
-        print('Sorted dictionary... \n')
-        
         for row in sortedMetadataDict:
                 # Getting back to the main directory
             os.chdir(DIRECTORY_CALLBACK)
@@ -378,8 +368,6 @@ class Whatsapp(webdriver.Chrome):
                 print(str(len(audios)) + ' audio(s) found... \n')
                 for audio in audios:
                     
-                    self.wait(10)
-
                     ActionChains(self).move_to_element(audio).perform()
                     
                     self.wait(3)
@@ -394,8 +382,6 @@ class Whatsapp(webdriver.Chrome):
                     
                     downloadButton.click()
                     
-                    self.wait(3)
-
             else:
                 raise AudioNotFoundException("ERRORE! AUDIO NON PRESENTI! \n")
                 
@@ -413,7 +399,7 @@ class Whatsapp(webdriver.Chrome):
                 print(str(len(images)) + ' image(s) found... \n')
                 for image in images:
                     
-                    self.wait(10)
+                    self.wait(3)
                     
                     image.click()
     
@@ -446,7 +432,7 @@ class Whatsapp(webdriver.Chrome):
                 print(str(len(videoPlayers)) + ' video(s) found... \n')
                 for playButton in videoPlayers:
                     
-                    self.wait(10)
+                    self.wait(3)
                     
                     playButton.click()
                     
@@ -478,7 +464,7 @@ class Whatsapp(webdriver.Chrome):
                 print(str(len(pdfList)) + ' PDF(s) found... \n')
                 for pdf in pdfList:
                     
-                    self.wait(10)
+                    self.wait(3)
                     
                     pdf.click()
                     
@@ -499,6 +485,7 @@ class Whatsapp(webdriver.Chrome):
         os.chdir(contactName)
         
         print('Writing new data to csv... \n')
+        print(data)
         
         if not os.path.exists(contactName + ".csv"):
             newDataFrame = pd.DataFrame([data], columns=HEADER)
@@ -574,8 +561,14 @@ class Whatsapp(webdriver.Chrome):
     
     
     def zipFiles(self, path, contactName):
-        print('Sono nella funzione zipFiles()')
         os.chdir(path)
+        # Zipping multimedia files
+        with zipfile.ZipFile(contactName + "_" + MULTIMEDIA_ZIP_NAME + ".zip", "w", compression=zipfile.ZIP_DEFLATED) as f:
+            for file in os.listdir():
+                if(file != contactName + ".csv" and not file.endswith(".zip")):
+                    f.write(file)
+        # Zipping .csv file
         with zipfile.ZipFile(contactName + ".zip", "w", compression=zipfile.ZIP_DEFLATED) as f:
             for file in os.listdir():
-                f.write(file)
+                if(file == contactName + ".csv" and not file.endswith(".zip")):
+                    f.write(file)

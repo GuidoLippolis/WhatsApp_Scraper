@@ -159,11 +159,8 @@ class Whatsapp(webdriver.Chrome):
     
     
     def archiveChats(self, unarchivedChats):
-        print('Sono nel metodo archiveContacts() \n')
+
         setUnarchivedChats = set(unarchivedChats)
-        print('Metto i contatti archiviati in un insieme: ')
-        print(setUnarchivedChats)
-        print('\n')
         
         numArchivedChats = 0
         pixels = 0
@@ -174,19 +171,10 @@ class Whatsapp(webdriver.Chrome):
         while len(unarchivedChats) != 0:
             scrolls += 1
             self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
-            print('Scroll n. ' + str(scrolls) + '... \n')
             chats = self.getContacts()
             chatsAsString = self.fillNameList(chats)
-            print('Chats as strings contiene: ')
-            print(chatsAsString)
             setChats = set(chatsAsString)
-            print('Metto le chat trovate in un insieme: ')
-            print(setChats)
-            print('\n')
             setContactsToArchive = setUnarchivedChats.intersection(chatsAsString)
-            print('La loro intersezione è: ')
-            print(setContactsToArchive)
-            print(' e la dimensione dell insieme intersezione è ' + str(len(setContactsToArchive)))
             
             if(len(setContactsToArchive) == 0):
                 pixels += PIXELS_TO_SCROLL

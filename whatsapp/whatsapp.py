@@ -167,14 +167,8 @@ class Whatsapp(webdriver.Chrome):
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
         while len(unarchivedChats) != 0:
-            chats2 = []
             self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
             chats = self.getContacts()
-            
-            for chat in chats:
-                if(len(chat.get_attribute('title')) != 0):
-                    chats2.append(chat)
-                    
             chatsAsStrings = self.fillNameList(chats)
             print('Dopo lo scroll (per l archivio) sono presenti: \n')
             print(chatsAsStrings)
@@ -185,14 +179,9 @@ class Whatsapp(webdriver.Chrome):
                 pixels += PIXELS_TO_SCROLL
                 continue
             else:
-                print('Chats 2 contiene: \n')
-                
-                for c2 in chats2:
-                    print(c2.get_attribute('title'))
-                    print('\n')
-                
-                for chat in chats2:
-                    if(chat.get_attribute('title') in list(setContactsToArchive)):
+                for chat in chats:
+                    name = chat.get_attribute('title')
+                    if(len(name) != 0 and name in list(setContactsToArchive)):
                         print('Looking for ' + chat.get_attribute('title') + ' to archive... \n')
                         self.wait(2)
                         ActionChains(self).move_to_element(chat).perform()

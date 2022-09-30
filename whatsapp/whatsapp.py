@@ -125,7 +125,7 @@ class Whatsapp(webdriver.Chrome):
                 
                 archivedChatsButton[0].click()
                 
-                self.wait(20)
+                self.wait(5)
         
                 unarchivedContacts = []
                 archivedChats2 = []
@@ -139,7 +139,7 @@ class Whatsapp(webdriver.Chrome):
                 for chat in archivedChats2:
                     if(chat.is_displayed()):
                         unarchivedContacts.append(chat.get_attribute('title'))
-                        self.wait(5)
+                        self.wait(2)
                         ActionChains(self).move_to_element(chat).perform()
                         self.wait(1)
                         dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
@@ -156,35 +156,45 @@ class Whatsapp(webdriver.Chrome):
         except ArchivedChatsButtonNotFoundException as acb:
             print(acb)
         
-    
-    
+        
+        
     def archiveChats(self, unarchivedChats):
 
         setUnarchivedChats = set(unarchivedChats)
         
-        numArchivedChats = 0
         pixels = 0
-        scrolls = 0
         
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
         while len(unarchivedChats) != 0:
-            scrolls += 1
+            chats2 = []
             self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
             chats = self.getContacts()
-            chatsAsString = self.fillNameList(chats)
-            setChats = set(chatsAsString)
-            setContactsToArchive = setUnarchivedChats.intersection(chatsAsString)
+            
+            for chat in chats:
+                if(len(chat.get_attribute('title')) != 0):
+                    chats2.append(chat)
+                    
+            chatsAsStrings = self.fillNameList(chats)
+            print('Dopo lo scroll (per l archivio) sono presenti: \n')
+            print(chatsAsStrings)
+            setChats = set(chatsAsStrings)
+            setContactsToArchive = setUnarchivedChats.intersection(setChats)
             
             if(len(setContactsToArchive) == 0):
                 pixels += PIXELS_TO_SCROLL
                 continue
             else:
-                for chat in chats:
-                    name = chat.get_attribute('title')
-                    if(len(name) != 0 and name in list(setContactsToArchive)):
-                        print('Looking for ' + name + ' to archive... \n')
-                        self.wait(5)
+                print('Chats 2 contiene: \n')
+                
+                for c2 in chats2:
+                    print(c2.get_attribute('title'))
+                    print('\n')
+                
+                for chat in chats2:
+                    if(chat.get_attribute('title') in list(setContactsToArchive)):
+                        print('Looking for ' + chat.get_attribute('title') + ' to archive... \n')
+                        self.wait(2)
                         ActionChains(self).move_to_element(chat).perform()
                         self.wait(1)
                         dropDownArchiveChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
@@ -193,10 +203,27 @@ class Whatsapp(webdriver.Chrome):
                         archiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
                         archiveButton.click()
                         unarchivedChats.pop()
-                        numArchivedChats += 1
                         self.execute_script(scriptGoBack)
-                pixels += PIXELS_TO_SCROLL
-        print('Ended archiving contacts! \n')
+                        
+                pixels += PIXELS_TO_SCROLL    
+
+
+    # def archiveChats(self, unarchivedChats):
+        
+    #     setUnarchivedChats = set(unarchivedChats)
+        
+    #     pixels = 0
+        
+    #     scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
+        
+    #     chats = self.getContacts()
+    #     chatsAsStrings = self.fillNameList(chats)
+    #     setChatsAsStrings = set(chatsAsStrings)
+    #     setContactsToArchive = setUnarchivedChats.intersection(setChatsAsStrings)
+        
+        
+        
+    
     
     def findChatToScrap(self):
         
@@ -236,7 +263,7 @@ class Whatsapp(webdriver.Chrome):
             
                     print('Cercando ' + contactName + '... \n')
                     
-                    self.wait(20)
+                    # self.wait(20)
                     chats = self.getContacts()
                     
                     print('Prima di scrollare erano presenti: \n')
@@ -269,7 +296,7 @@ class Whatsapp(webdriver.Chrome):
                             while True:
                                 try:
                                     self.implicitly_wait(200)
-                                    self.wait(5)
+                                    # self.wait(5)
                                     scrolledChats = self.getContacts()
                                     
                                     updatedList = self.updateList(chats, scrolledChats)

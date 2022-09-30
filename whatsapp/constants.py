@@ -66,7 +66,6 @@ XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb')]"
 XPATH_AUDIOS = "//span[contains(@data-testid, 'audio-play')]"
 
 # XPath for drop down menu for downloading audios
-# XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//span[contains(@data-testid, 'down-context')]"
 XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//div[contains(@data-testid, 'icon-down-context')]"
 
 # XPath for downloading audios
@@ -89,6 +88,7 @@ XPATH_PDF_LIST = '//button[contains(@data-testid,"document-thumb")]'
 
 # Accepted extensions
 ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf"]
+# ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf", ".docx", ".txt", ".doc", ".xlsx"]
 
 # Chat filter button
 XPATH_CHAT_FILTER_BUTTON = '//span[contains(@data-testid,"filter")]'
@@ -98,3 +98,6 @@ MULTIMEDIA_ZIP_NAME = "media"
 
 # Hashing .csv file
 HASHING_CSV_FILE_NAME = "hashing.csv"
+
+# Button to close archived chats section
+CLOSE_ARCHIVED_CHATS_SECTION = '//button[contains(@data-testid,"btn-closer-drawer")]'

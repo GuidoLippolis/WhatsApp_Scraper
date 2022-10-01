@@ -159,10 +159,99 @@ class Whatsapp(webdriver.Chrome):
           
 
 
+    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox):
+        
+        pixels = 0
+        pre_height = 0
+        new_height = 0
+        nScrolls = 0
+        
+        endOfSearch = False
+        
+        chats = self.getContacts()
+        newChats = []
+        
+        print('Prima dello scroll erano presenti: \n')
+        for c in chats:
+            if(len(c.get_attribute('title')) != 0):
+                print(c.get_attribute('title'))
+                print('\n')
+                
+        
+        for chat in chats:
+            contactName = chat.get_attribute('title')
+            if(len(contactName) != 0):
+                
+                path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                contactFound = self.searchContactToClick(chats, contactName)
+                if(contactFound == True):
+                    self.getConversation(path, contactName)
+                
+                    if(downloadMediaCheckbox == True):
+                        os.chdir(DIRECTORY_CALLBACK)
+                        self.downloadMedia()
+                        print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                        self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                        self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
+                        self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                
+        
+        while True:
+            updatedList = []
+            nScrolls += 1
+            print('Scroll n. ' + str(nScrolls) + '... \n')
+            pixels += PIXELS_TO_SCROLL
+            self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
+            new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
+            
+            while True:
+                
+                try:
+                    self.implicitly_wait(200)
+                    scrolledChats = self.getContacts()
+                    updatedList = self.updateList(chats, scrolledChats)
+                    print('Dopo lo scroll ci sono: \n')
+                    for c in updatedList:
+                        if(len(c.get_attribute('title')) != 0):
+                            print(c.get_attribute('title'))
+                            print('\n')
+                        if("/" in c.get_attribute('title')):
+                            (c.get_attribute('title')).replace("/", "_")
+                    
+                    for scrolledChat in updatedList:
+                        contactName = scrolledChat.get_attribute('title')
+                        if(len(contactName) != 0):
+                            path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                            contactFound = self.searchContactToClick(scrolledChats, contactName)
+                            if(contactFound == True):
+                                self.getConversation(path, contactName)
+                    
+                                if(downloadMediaCheckbox == True):
+                                    os.chdir(DIRECTORY_CALLBACK)
+                                    self.downloadMedia()
+                                    print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                                    self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                                    self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
+                                    self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                    
+                            break
+                    break
+                except:
+                    self.implicitly_wait(0.5)
+                    
+            if(endOfSearch == True):
+                break
+            
+            if(pre_height < new_height):
+                pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
+            else:
+                break
+    
+
     
     def findChatToScrap(self):
         
-        unarchiveChatsCheckbox = True
+        unarchiveChatsCheckbox = False
         downloadMediaCheckbox = False
         
         timestamp = self.getTimeStamp();
@@ -173,7 +262,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
-        self.wait(30)
+        self.wait(40)
         if(unarchiveChatsCheckbox == True):
             print('Unarchiving chats... \n')
             unarchivedContacts = self.unarchiveChats()
@@ -187,94 +276,90 @@ class Whatsapp(webdriver.Chrome):
         
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
-        try:
-            
-            contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
-            
-            if(len(contactNamesFromCSV) == 0):
-                raise EmptyContactsFileException("ERRORE! IL FILE CSV DEI CONTATTI E' VUOTO! \n")
-            else:
-                for contactName in contactNamesFromCSV:
-            
-                    print('Cercando ' + contactName + '... \n')
+        contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
+        
+        if(len(contactNamesFromCSV) == 0):
+            self.getAllChatsDefault(timestamp, downloadMediaCheckbox)
+        else:
+            for contactName in contactNamesFromCSV:
+        
+                print('Cercando ' + contactName + '... \n')
+                
+                chats = self.getContacts()
+                
+                print('Prima di scrollare erano presenti: \n')
+                chatsAsStrings = self.fillNameList(chats)
+                print(chatsAsStrings)
+                
+                contactFound = self.searchContactToClick(chats, contactName)
+                if(contactFound == True):
+                    print('Contatto trovato senza scrollare \n')
+                    path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                    self.getConversation(path, contactName)
                     
-                    chats = self.getContacts()
+                    if(downloadMediaCheckbox == True):
+                        os.chdir(DIRECTORY_CALLBACK)
+                        self.downloadMedia()
+                        print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                        self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                        self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
+                        self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                else:
                     
-                    print('Prima di scrollare erano presenti: \n')
-                    chatsAsStrings = self.fillNameList(chats)
-                    print(chatsAsStrings)
-                    
-                    contactFound = self.searchContactToClick(chats, contactName)
-                    if(contactFound == True):
-                        print('Contatto trovato senza scrollare \n')
-                        path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                        self.getConversation(path, contactName)
-                        
-                        if(downloadMediaCheckbox == True):
-                            os.chdir(DIRECTORY_CALLBACK)
-                            self.downloadMedia()
-                            print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                            self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                            self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
-                            self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                    else:
+                    while True:
+                        updatedList = []
+                        nScrolls += 1
+                        print('Scroll n. ' + str(nScrolls) + '... \n')
+                        pixels += PIXELS_TO_SCROLL
+                        self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
+                        new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
                         
                         while True:
-                            updatedList = []
-                            nScrolls += 1
-                            print('Scroll n. ' + str(nScrolls) + '... \n')
-                            pixels += PIXELS_TO_SCROLL
-                            self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
-                            new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-                            
-                            while True:
-                                try:
-                                    self.implicitly_wait(200)
-                                    scrolledChats = self.getContacts()
-                                    
-                                    updatedList = self.updateList(chats, scrolledChats)
-                                    
-                                    scrolledChatsAsStrings = self.fillNameList(updatedList)
-                                    
-                                    print('Dopo lo scroll n.' + str(nScrolls) + ' ci sono: \n')
-                                    print(scrolledChatsAsStrings)
-                            
-                                    contactFoundInScrolledChats = self.searchContactToClick(updatedList, contactName)
-                                    
-                                    print('Contact found = ' + str(contactFoundInScrolledChats))
-                                    
-                                    if(contactFoundInScrolledChats == True):
-                                        print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
-                                        endOfSearch = True
-                                        path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                                        self.getConversation(path, contactName)
+                            try:
+                                self.implicitly_wait(200)
+                                scrolledChats = self.getContacts()
+                                
+                                updatedList = self.updateList(chats, scrolledChats)
+                                
+                                scrolledChatsAsStrings = self.fillNameList(updatedList)
+                                
+                                print('Dopo lo scroll n.' + str(nScrolls) + ' ci sono: \n')
+                                print(scrolledChatsAsStrings)
+                        
+                                contactFoundInScrolledChats = self.searchContactToClick(updatedList, contactName)
+                                
+                                print('Contact found = ' + str(contactFoundInScrolledChats))
+                                
+                                if(contactFoundInScrolledChats == True):
+                                    print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
+                                    endOfSearch = True
+                                    path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                                    self.getConversation(path, contactName)
+                                    self.execute_script(scriptGoBack)
+                                
+                                    if(downloadMediaCheckbox == True):
+                                        os.chdir(DIRECTORY_CALLBACK)
+                                        self.downloadMedia()
+                                        print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                                        self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                                        self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
                                         self.execute_script(scriptGoBack)
-                                    
-                                        if(downloadMediaCheckbox == True):
-                                            os.chdir(DIRECTORY_CALLBACK)
-                                            self.downloadMedia()
-                                            print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                                            self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                                            self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
-                                            self.execute_script(scriptGoBack)
-                                            self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                                        
-                                        break
+                                        self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                                     
                                     break
-                                except:
-                                    self.implicitly_wait(0.5)
-                                    
-                            if(endOfSearch):
+                                
                                 break
-                            
-                            if(pre_height < new_height):
-                                pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
-                            else:
-                                break
+                            except:
+                                self.implicitly_wait(0.5)
+                                
+                        if(endOfSearch):
+                            break
+                        
+                        if(pre_height < new_height):
+                            pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
+                        else:
+                            break
             
-        except EmptyContactsFileException as ecf:
-            print(ecf)
                     
         if(unarchiveChatsCheckbox == True):
             print('Re-archiving chats... \n')
@@ -551,10 +636,15 @@ class Whatsapp(webdriver.Chrome):
     def makeCSV(self, data, pathToCSV, contactName):
         
         os.chdir(pathToCSV)
-        if not os.path.exists(contactName):
-            print('Creating folder ' + contactName + '... \n')
-            os.mkdir(contactName)
-        os.chdir(contactName)
+        if("/" in contactName):
+            contactName = contactName.replace("/", "_")
+            if not os.path.exists(contactName):
+                os.mkdir(contactName)
+            os.chdir(contactName)
+        else:
+            if not os.path.exists(contactName):
+                os.mkdir(contactName)
+            os.chdir(contactName)
         
         print('Writing new data to csv... \n')
         print(data)

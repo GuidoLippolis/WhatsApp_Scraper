@@ -104,3 +104,6 @@ CLOSE_ARCHIVED_CHATS_SECTION = '//button[contains(@data-testid,"btn-closer-drawe
 
 # Characters to avoid
 CHARACTERS_TO_AVOID = ["/", "\\", ":", "*", "?", "<", ">", "|", '"']
+
+# Regular expression for file or folder names
+REGULAR_EXPRESSION = "[^a-zA-Z]*"

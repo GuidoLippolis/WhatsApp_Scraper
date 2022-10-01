@@ -10,6 +10,8 @@ from datetime import datetime
 
 import os
 
+import re
+
 import pathlib
 
 import shutil
@@ -58,6 +60,8 @@ from whatsapp.constants import XPATH_CHAT_FILTER_BUTTON
 from whatsapp.constants import MULTIMEDIA_ZIP_NAME
 from whatsapp.constants import HASHING_CSV_FILE_NAME
 from whatsapp.constants import CLOSE_ARCHIVED_CHATS_SECTION
+from whatsapp.constants import CHARACTERS_TO_AVOID
+from whatsapp.constants import REGULAR_EXPRESSION
 
 import pandas as pd
 
@@ -636,8 +640,8 @@ class Whatsapp(webdriver.Chrome):
     def makeCSV(self, data, pathToCSV, contactName):
         
         os.chdir(pathToCSV)
-        if("/" in contactName):
-            contactName = contactName.replace("/", "_")
+        if(not self.isFileNameValid(contactName)):
+            contactName = self.renameFileOrFolderName(contactName)
             if not os.path.exists(contactName):
                 os.mkdir(contactName)
             os.chdir(contactName)
@@ -657,6 +661,16 @@ class Whatsapp(webdriver.Chrome):
             newDataFrame.to_csv(contactName + ".csv", mode='a', index=False, header=False, sep=";")
         
         
+     
+    def isFileNameValid(self, fileName):
+        return not any([char in fileName for char in CHARACTERS_TO_AVOID])    
+    
+   
+    
+    def renameFileOrFolderName(self, fileName):
+        return "".join(re.split(REGULAR_EXPRESSION, fileName))
+    
+    
         
     def getSender(self, messageMetadata):
         return (messageMetadata.split("] ")[1]).split(":")[0]
@@ -717,7 +731,7 @@ class Whatsapp(webdriver.Chrome):
             
         os.chdir(DIRECTORY_CALLBACK)
         
-        
+    
     
     def fixFileName(self, fileName):
         newFileName = fileName.split(pathlib.Path(fileName).suffix)

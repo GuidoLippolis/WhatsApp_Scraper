@@ -101,3 +101,6 @@ HASHING_CSV_FILE_NAME = "hashing.csv"
 
 # Button to close archived chats section
 CLOSE_ARCHIVED_CHATS_SECTION = '//button[contains(@data-testid,"btn-closer-drawer")]'
+
+# Characters to avoid
+CHARACTERS_TO_AVOID = ["/", "\\", ":", "*", "?", "<", ">", "|", '"']

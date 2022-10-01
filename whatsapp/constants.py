@@ -35,6 +35,9 @@ XPATH_SENDER = ".//div[contains(@data-pre-plain-text,'[')]"
 # Header of CSV file containing scraped messages
 HEADER = ["Data", "Ora", "Mittente", "Messaggio"]
 
+# Header of CSV file containing hashing information
+HEADER_HASHING = ["Nome Zip", "MD5", "SHA-512"]
+
 # Name of the directory containing scraped chats
 SCRAPING_DIRECTORY_NAME = "Scraped"
 

@@ -36,6 +36,7 @@ from whatsapp.constants import CHAT_SECTION_HTML_ID
 from whatsapp.constants import XPATH_TEXT_MESSAGES_CONTAINERS
 from whatsapp.constants import XPATH_EMOJIS
 from whatsapp.constants import HEADER
+from whatsapp.constants import HEADER_HASHING
 from whatsapp.constants import XPATH_SENDER
 from whatsapp.constants import XPATH_TEXT_MESSAGES
 from whatsapp.constants import SCRAPING_DIRECTORY_NAME
@@ -256,7 +257,7 @@ class Whatsapp(webdriver.Chrome):
     def findChatToScrap(self):
         
         unarchiveChatsCheckbox = False
-        downloadMediaCheckbox = False
+        downloadMediaCheckbox = True
         
         timestamp = self.getTimeStamp();
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
@@ -596,7 +597,7 @@ class Whatsapp(webdriver.Chrome):
                     
                     playButton.click()
                     
-                    self.wait(3)
+                    self.wait(60)
                     
                     downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
                     
@@ -761,10 +762,11 @@ class Whatsapp(webdriver.Chrome):
         os.chdir(path)
         
         print('Creating file ' + HASHING_CSV_FILE_NAME + '... \n')
-                
+        
         for fileName in os.listdir():
             
-            sha256 = hashlib.sha256()
+            data = []
+            sha512 = hashlib.sha512()
             md5 = hashlib.md5()
             
             if(fileName.endswith(".zip")):
@@ -772,7 +774,17 @@ class Whatsapp(webdriver.Chrome):
                 with open(fileName, "rb") as f:
                     # Read and update hash string value in blocks of 4K
                     for chunk in iter(lambda: f.read(4096), b""):
-                        sha256.update(chunk)
+                        sha512.update(chunk)
                         md5.update(chunk)
-                    print('{}: {}'.format(sha256.name, sha256.hexdigest()))
+                    print('{}: {}'.format(sha512.name, sha512.hexdigest()))
                     print('{}: {}'.format(md5.name, md5.hexdigest()))
+                    data.append(fileName)
+                    data.append(md5.hexdigest())
+                    data.append(sha512.hexdigest())
+                    if not os.path.exists(HASHING_CSV_FILE_NAME):
+                        newDataFrame = pd.DataFrame([data], columns=HEADER_HASHING)
+                        newDataFrame.to_csv(HASHING_CSV_FILE_NAME, mode='a', index=False, header=True, sep=";")
+                    else:
+                        newDataFrame = pd.DataFrame([data], columns=HEADER_HASHING)
+                        newDataFrame.to_csv(HASHING_CSV_FILE_NAME, mode='a', index=False, header=False, sep=";")
+                    

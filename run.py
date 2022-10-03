@@ -12,19 +12,12 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 import threading
 
-# SISTEMARE QUESTA CACATA USANDO UN FILE ESTERNO
-
-it = ['Data gg/mm/aaaa', 'Ora', 'Mittente', 'Messaggio', 'scraper pronto',
-      'Autori: Guido Lippolis, Cosimo Gennaro e Simone Marchitelli', 'Opzioni',
-      'Caricare lista contatti', 'Avvia scraper', 'Scraping chat archiviate', 'Cartella di destinazione']
-en = ['Date mm/dd/yyyy', 'Time', 'Sender', 'Message', 'scraper ready',
-      'Authors: Guido Lippolis, Cosimo Gennaro and Simone Marchitelli', 'Options',
-      'Load contact list', 'Start scraper', 'Scraping archived chats', 'Destination folder']
+configurationFile = 'config.ini'
+config = ConfigParser()
+config.read(configurationFile)
 
 def openBrowser():
     Whatsapp().findChatToScrap()
-
-
 
 def changeLanguage(index, value, op):
     print(config.sections())
@@ -47,17 +40,16 @@ def changeLanguage(index, value, op):
         config.write(file)
     return
 
-configurationFile = 'config.ini'
-config = ConfigParser()
-config.read(configurationFile)
+# configurationFile = 'config.ini'
+# config = ConfigParser()
+# config.read(configurationFile)
 
 window = tk.Tk()
 window.geometry("900x625")
 window.title("WhatsApp Scraper")
 window.grid_columnconfigure(0, weight=1)
 window.resizable(False, False)
-# config['Lingua']['lingua_corrente'] ]['data']
-tree = ttk.Treeview(window, show="headings", columns=(it[0], it[1], it[2], it[3]), height=14)
+tree = ttk.Treeview(window, show="headings", columns=(config[ config['Lingua']['lingua_corrente'] ]['data'], config[ config['Lingua']['lingua_corrente'] ]['ora'], config[ config['Lingua']['lingua_corrente'] ]['mittente'], config[ config['Lingua']['lingua_corrente'] ]['messaggio']), height=14)
 tree.heading(0, text=config[ config['Lingua']['lingua_corrente'] ]['data'], anchor=tk.W)
 tree.heading(1, text=config[ config['Lingua']['lingua_corrente'] ]['ora'], anchor=tk.W)
 tree.heading(2, text=config[ config['Lingua']['lingua_corrente'] ]['mittente'], anchor=tk.W)
@@ -84,23 +76,19 @@ title.grid(row=0, column=0, sticky="N", padx=20, pady=10)
 output_label = tk.Label(text="Log: ")
 output_label.grid(row=6, column=0, sticky="W", padx=10, pady=10)
 
-# output_label_2 = tk.Label(text=it[4], bg="white", fg="black", borderwidth=2, relief="groove", anchor='w')
 output_label_2 = tk.Label(bg="white", fg="black", borderwidth=2, relief="groove", anchor='w')
 output_label_2.configure(width=50)
 output_label_2.grid(row=6, column=0, sticky="W", padx=45, pady=10)
 
-# credit_label = tk.Label(window, text=it[5])
 credit_label = tk.Label(window)
 credit_label.grid(row=6, column=0, stick="E", padx=10, pady=0)
 
 xf = tk.Frame(window, relief=tk.GROOVE, borderwidth=2, width=920, height=70)
 xf.grid(row=1, column=0, sticky="W", padx=10, pady=10)
 
-# label = tk.Label(xf, text=it[6])
 label = tk.Label(xf)
 label.place(relx=.06, rely=0.04, anchor=tk.W)
 
-# choose_1 = tk.Button(text=it[7])
 choose_1 = tk.Button()
 choose_1.grid(row=1, column=0, sticky="W", padx=30, pady=10)
 

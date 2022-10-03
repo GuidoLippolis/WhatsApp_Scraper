@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct  3 12:16:25 2022
-
 @author: guido
 """
 
@@ -29,19 +28,23 @@ def openBrowser():
 
 def changeLanguage(index, value, op):
     print(config.sections())
-    print('\n')
-    print(comboLang.get())
-    tree.heading(0, text=config[comboLang.get()]['data'], anchor=tk.W)
-    tree.heading(1, text=config[comboLang.get()]['ora'], anchor=tk.W)
-    tree.heading(2, text=config[comboLang.get()]['mittente'], anchor=tk.W)
-    tree.heading(3, text=config[comboLang.get()]['messaggio'], anchor=tk.W)
-    output_label_2.config(text=config[comboLang.get()]['stato'])
-    credit_label.config(text=config[comboLang.get()]['autore'])
-    label.config(text=config[comboLang.get()]['opzioni'])
-    choose_1.config(text=config[comboLang.get()]['lista_contatti'])
-    choose_2.config(text=config[comboLang.get()]['avvio'])
-    c2.config(text=config[comboLang.get()]['chat_archiviate'])
-    choose_dest.config(text=config[comboLang.get()]['destinazione'])
+    config.set('Lingua', 'lingua_corrente', comboLang.get())
+    with open(configurationFile, 'w') as file:
+        config.write(file)
+    tree.heading(0, text=config[ config['Lingua']['lingua_corrente'] ]['data'], anchor=tk.W)
+    tree.heading(1, text=config[ config['Lingua']['lingua_corrente'] ]['ora'], anchor=tk.W)
+    tree.heading(2, text=config[ config['Lingua']['lingua_corrente'] ]['mittente'], anchor=tk.W)
+    tree.heading(3, text=config[ config['Lingua']['lingua_corrente'] ]['messaggio'], anchor=tk.W)
+    output_label_2.config(text=config[ config['Lingua']['lingua_corrente'] ]['stato'])
+    credit_label.config(text=config[ config['Lingua']['lingua_corrente'] ]['autore'])
+    label.config(text=config[ config['Lingua']['lingua_corrente'] ]['opzioni'])
+    choose_1.config(text=config[ config['Lingua']['lingua_corrente'] ]['lista_contatti'])
+    choose_2.config(text=config[ config['Lingua']['lingua_corrente'] ]['avvio'])
+    c2.config(text=config[ config['Lingua']['lingua_corrente'] ]['chat_archiviate'])
+    choose_dest.config(text=config[ config['Lingua']['lingua_corrente'] ]['destinazione'])
+    config.set('Lingua', 'lingua_corrente', comboLang.get())
+    with open(configurationFile, 'w') as file:
+        config.write(file)
     return
 
 configurationFile = 'config.ini'
@@ -53,12 +56,12 @@ window.geometry("900x625")
 window.title("WhatsApp Scraper")
 window.grid_columnconfigure(0, weight=1)
 window.resizable(False, False)
-
+# config['Lingua']['lingua_corrente'] ]['data']
 tree = ttk.Treeview(window, show="headings", columns=(it[0], it[1], it[2], it[3]), height=14)
-tree.heading(it[0], text=it[0], anchor=tk.W)
-tree.heading(it[1], text=it[1], anchor=tk.W)
-tree.heading(it[2], text=it[2], anchor=tk.W)
-tree.heading(it[3], text=it[3], anchor=tk.W)
+tree.heading(0, text=config[ config['Lingua']['lingua_corrente'] ]['data'], anchor=tk.W)
+tree.heading(1, text=config[ config['Lingua']['lingua_corrente'] ]['ora'], anchor=tk.W)
+tree.heading(2, text=config[ config['Lingua']['lingua_corrente'] ]['mittente'], anchor=tk.W)
+tree.heading(3, text=config[ config['Lingua']['lingua_corrente'] ]['messaggio'], anchor=tk.W)
 tree.column('#1', minwidth=110, stretch=False, width=110)
 tree.column('#2', minwidth=90, stretch=False, width=90)
 tree.column('#3', minwidth=140, stretch=False, width=140)
@@ -131,8 +134,9 @@ v.trace('w', changeLanguage)
 comboLang = ttk.Combobox(window, textvar=v, state="readonly",
                          values=[
                              "English",
-                             "Italian"])
+                             "Italiano"])
 comboLang.grid(row=0, column=0, sticky="W", padx=10, pady=10)
-comboLang.set('Italian')
+comboLang.set(config['Lingua']['lingua_corrente'])
+print('Lingua corrente ' + config['Lingua']['lingua_corrente'])
 
 window.mainloop()

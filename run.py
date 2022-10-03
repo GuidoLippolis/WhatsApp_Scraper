@@ -118,7 +118,8 @@ comboLang = ttk.Combobox(window, textvar=v, state="readonly",
                          values=[
                              "English",
                              "Italiano",
-                             "Francais"])
+                             "Francais",
+                             "Deutsch"])
 comboLang.grid(row=0, column=0, sticky="W", padx=10, pady=10)
 comboLang.set(config['Lingua']['lingua_corrente'])
 

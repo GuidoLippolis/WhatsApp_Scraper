@@ -12,7 +12,7 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 import threading
 
-configurationFile = 'config.ini'
+configurationFile = 'properties/language.ini'
 config = ConfigParser()
 config.read(configurationFile)
 
@@ -20,7 +20,6 @@ def openBrowser():
     Whatsapp().findChatToScrap()
 
 def changeLanguage(index, value, op):
-    print(config.sections())
     config.set('Lingua', 'lingua_corrente', comboLang.get())
     with open(configurationFile, 'w') as file:
         config.write(file)
@@ -39,10 +38,6 @@ def changeLanguage(index, value, op):
     with open(configurationFile, 'w') as file:
         config.write(file)
     return
-
-# configurationFile = 'config.ini'
-# config = ConfigParser()
-# config.read(configurationFile)
 
 window = tk.Tk()
 window.geometry("900x625")
@@ -125,6 +120,5 @@ comboLang = ttk.Combobox(window, textvar=v, state="readonly",
                              "Italiano"])
 comboLang.grid(row=0, column=0, sticky="W", padx=10, pady=10)
 comboLang.set(config['Lingua']['lingua_corrente'])
-print('Lingua corrente ' + config['Lingua']['lingua_corrente'])
 
 window.mainloop()

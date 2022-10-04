@@ -110,3 +110,9 @@ CHARACTERS_TO_AVOID = ["/", "\\", ":", "*", "?", "<", ">", "|", '"']
 
 # Regular expression for file or folder names
 REGULAR_EXPRESSION = "[^a-zA-Z]*"
+
+# Current language
+CURRENT_LANGUAGE = "lingua_corrente"
+
+# Language section in config file
+LANGUAGE = 'Lingua'

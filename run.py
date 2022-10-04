@@ -11,50 +11,76 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 import threading
+from tkinter import *
+
+from whatsapp.constants import CURRENT_LANGUAGE
+from whatsapp.constants import LANGUAGE
 
 configurationFile = 'properties/language.ini'
 config = ConfigParser()
 config.read(configurationFile)
 
-def openBrowser():
-    Whatsapp().findChatToScrap()
-
 def changeLanguage(index, value, op):
-    config.set('Lingua', 'lingua_corrente', comboLang.get())
+    config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     with open(configurationFile, 'w') as file:
         config.write(file)
-    tree.heading(0, text=config[ config['Lingua']['lingua_corrente'] ]['data'], anchor=tk.W)
-    tree.heading(1, text=config[ config['Lingua']['lingua_corrente'] ]['ora'], anchor=tk.W)
-    tree.heading(2, text=config[ config['Lingua']['lingua_corrente'] ]['mittente'], anchor=tk.W)
-    tree.heading(3, text=config[ config['Lingua']['lingua_corrente'] ]['messaggio'], anchor=tk.W)
-    output_label_2.config(text=config[ config['Lingua']['lingua_corrente'] ]['stato'])
-    credit_label.config(text=config[ config['Lingua']['lingua_corrente'] ]['autore'])
-    label.config(text=config[ config['Lingua']['lingua_corrente'] ]['opzioni'])
-    choose_1.config(text=config[ config['Lingua']['lingua_corrente'] ]['lista_contatti'])
-    choose_2.config(text=config[ config['Lingua']['lingua_corrente'] ]['avvio'])
-    c2.config(text=config[ config['Lingua']['lingua_corrente'] ]['chat_archiviate'])
-    choose_dest.config(text=config[ config['Lingua']['lingua_corrente'] ]['destinazione'])
-    config.set('Lingua', 'lingua_corrente', comboLang.get())
+    tree.heading(0, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
+    tree.heading(1, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
+    tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
+    tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
+    output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stato'])
+    credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
+    label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
+    choose_1.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['lista_contatti'])
+    choose_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['avvio'])
+    c2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['chat_archiviate'])
+    choose_dest.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['destinazione'])
+    config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     with open(configurationFile, 'w') as file:
         config.write(file)
     return
+
+
+def selectDestinationFolder():
+    path = filedialog.askdirectory()
+    choose_dest_label.configure(text=path)
+
+
+def uploadContactsFile():
+    global pathToCSV
+    filename = filedialog.askopenfilename(filetypes=(("CSV files", "*.csv*"), ("all files", "*.*")))
+    choose_label.configure(text=filename)
+    pathToCSV = filename
+    
+    
+    
+def openBrowser():
+    Whatsapp().findChatToScrap(tree, pathToCSV)
+    
+    
+    
 
 window = tk.Tk()
 window.geometry("900x625")
 window.title("WhatsApp Scraper")
 window.grid_columnconfigure(0, weight=1)
 window.resizable(False, False)
-tree = ttk.Treeview(window, show="headings", columns=(config[ config['Lingua']['lingua_corrente'] ]['data'], config[ config['Lingua']['lingua_corrente'] ]['ora'], config[ config['Lingua']['lingua_corrente'] ]['mittente'], config[ config['Lingua']['lingua_corrente'] ]['messaggio']), height=14)
-tree.heading(0, text=config[ config['Lingua']['lingua_corrente'] ]['data'], anchor=tk.W)
-tree.heading(1, text=config[ config['Lingua']['lingua_corrente'] ]['ora'], anchor=tk.W)
-tree.heading(2, text=config[ config['Lingua']['lingua_corrente'] ]['mittente'], anchor=tk.W)
-tree.heading(3, text=config[ config['Lingua']['lingua_corrente'] ]['messaggio'], anchor=tk.W)
+window.iconbitmap('whatsapp.ico')
+
+
+
+tree = ttk.Treeview(window, show="headings", columns=(config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio']), height=14)
+tree.heading(0, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
+tree.heading(1, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
+tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
+tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
 tree.column('#1', minwidth=110, stretch=False, width=110)
 tree.column('#2', minwidth=90, stretch=False, width=90)
 tree.column('#3', minwidth=140, stretch=False, width=140)
 tree.column('#4', minwidth=535, stretch=True, width=535)
 style = ttk.Style(window)
 tree.grid(row=5, column=0, padx=10, pady=10, stick='W')
+
 
 vsbar = tk.Scrollbar(window, orient=tk.VERTICAL, command=tree.yview)
 vsbar.place(x=868, y=279, height=280, width=20)
@@ -84,7 +110,7 @@ xf.grid(row=1, column=0, sticky="W", padx=10, pady=10)
 label = tk.Label(xf)
 label.place(relx=.06, rely=0.04, anchor=tk.W)
 
-choose_1 = tk.Button()
+choose_1 = tk.Button(command=uploadContactsFile)
 choose_1.grid(row=1, column=0, sticky="W", padx=30, pady=10)
 
 xf_2 = tk.Frame(window, relief=tk.GROOVE, borderwidth=2, width=920, height=70)
@@ -94,7 +120,7 @@ choose_dest_label = tk.Label(text="", bg="white", fg="black", borderwidth=2, rel
 choose_dest_label.configure(width=55)
 choose_dest_label.grid(row=2, column=0, sticky="W", padx=185, pady=10)
 
-choose_dest = tk.Button()
+choose_dest = tk.Button(command=selectDestinationFolder)
 choose_dest.grid(row=2, column=0, sticky="W", padx=30, pady=10)
 
 choose_label = tk.Label(text="", bg="white", fg="black", borderwidth=2, relief="groove", anchor='w')
@@ -121,6 +147,6 @@ comboLang = ttk.Combobox(window, textvar=v, state="readonly",
                              "Francais",
                              "Deutsch"])
 comboLang.grid(row=0, column=0, sticky="W", padx=10, pady=10)
-comboLang.set(config['Lingua']['lingua_corrente'])
+comboLang.set(config[LANGUAGE][CURRENT_LANGUAGE])
 
 window.mainloop()

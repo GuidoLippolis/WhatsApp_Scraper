@@ -22,6 +22,8 @@ import hashlib
 
 from selenium import webdriver
 
+import tkinter as tk
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -70,7 +72,6 @@ from whatsapp.exceptions.ImageNotFoundException import ImageNotFoundException
 from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
 from whatsapp.exceptions.AudioNotFoundException import AudioNotFoundException
 from whatsapp.exceptions.DocumentNotFoundException import DocumentNotFoundException
-from whatsapp.exceptions.EmptyContactsFileException import EmptyContactsFileException
 from whatsapp.exceptions.ArchivedChatsButtonNotFoundException import ArchivedChatsButtonNotFoundException
 
 class Whatsapp(webdriver.Chrome):
@@ -254,10 +255,12 @@ class Whatsapp(webdriver.Chrome):
     
 
     
-    def findChatToScrap(self):
+    def findChatToScrap(self, tree, pathToCSV):
+        
+        print('Estraggo le chat dal file ' + pathToCSV)
         
         unarchiveChatsCheckbox = False
-        downloadMediaCheckbox = True
+        downloadMediaCheckbox = False
         
         timestamp = self.getTimeStamp();
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
@@ -267,7 +270,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
-        self.wait(40)
+        self.wait(5)
         if(unarchiveChatsCheckbox == True):
             print('Unarchiving chats... \n')
             unarchivedContacts = self.unarchiveChats()
@@ -281,7 +284,8 @@ class Whatsapp(webdriver.Chrome):
         
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
-        contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
+        # contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
+        contactNamesFromCSV = self.readContactsFromFile(pathToCSV)
         
         if(len(contactNamesFromCSV) == 0):
             self.getAllChatsDefault(timestamp, downloadMediaCheckbox)
@@ -300,7 +304,7 @@ class Whatsapp(webdriver.Chrome):
                 if(contactFound == True):
                     print('Contatto trovato senza scrollare \n')
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                    self.getConversation(path, contactName)
+                    self.getConversation(path, contactName, tree)
                     
                     if(downloadMediaCheckbox == True):
                         os.chdir(DIRECTORY_CALLBACK)
@@ -339,7 +343,7 @@ class Whatsapp(webdriver.Chrome):
                                     print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
                                     endOfSearch = True
                                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                                    self.getConversation(path, contactName)
+                                    self.getConversation(path, contactName, tree)
                                     self.execute_script(scriptGoBack)
                                 
                                     if(downloadMediaCheckbox == True):
@@ -434,7 +438,7 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def getConversation(self, pathToCSV, contactName):
+    def getConversation(self, pathToCSV, contactName, tree):
         
         print('Getting conversation with ' + contactName + '... \n')
         
@@ -474,7 +478,7 @@ class Whatsapp(webdriver.Chrome):
                 row[2]
             ])
                 # A .csv file named as the contact name the scraper is processing is created
-            self.makeCSV(dataToAppend[0], pathToCSV, contactName)
+            self.makeCSV(dataToAppend[0], pathToCSV, contactName, tree)
     
         
     
@@ -638,7 +642,10 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def makeCSV(self, data, pathToCSV, contactName):
+    def makeCSV(self, data, pathToCSV, contactName, tree):
+        
+        tupla = (data[0], data[1], data[2], data[3])
+        tree.insert('', tk.END, values=tupla)
         
         os.chdir(pathToCSV)
         if(not self.isFileNameValid(contactName)):
@@ -787,4 +794,3 @@ class Whatsapp(webdriver.Chrome):
                     else:
                         newDataFrame = pd.DataFrame([data], columns=HEADER_HASHING)
                         newDataFrame.to_csv(HASHING_CSV_FILE_NAME, mode='a', index=False, header=False, sep=";")
-                    

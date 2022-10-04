@@ -5,25 +5,17 @@ Created on Sun Sep  4 12:10:34 2022
 """
 
 import time
-
 from datetime import datetime
-
 import os
-
 import re
-
 import pathlib
-
 import shutil
-
 import zipfile
-
 import hashlib
+import tkinter as tk
+import pandas as pd
 
 from selenium import webdriver
-
-import tkinter as tk
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -66,7 +58,6 @@ from whatsapp.constants import CLOSE_ARCHIVED_CHATS_SECTION
 from whatsapp.constants import CHARACTERS_TO_AVOID
 from whatsapp.constants import REGULAR_EXPRESSION
 
-import pandas as pd
 
 from whatsapp.exceptions.ImageNotFoundException import ImageNotFoundException
 from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
@@ -268,8 +259,6 @@ class Whatsapp(webdriver.Chrome):
             for contactName in contactNamesFromCSV:
 
                 chats = self.getContacts()
-                
-                chatsAsStrings = self.fillNameList(chats)
                 
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):

@@ -193,7 +193,7 @@ class Whatsapp(webdriver.Chrome):
                 if(contactFound == True):
                     self.getConversation(path, contactName)
                 
-                    if(downloadMediaCheckbox == True):
+                    if(downloadMediaCheckbox == 1):
                         os.chdir(DIRECTORY_CALLBACK)
                         self.downloadMedia()
                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
@@ -232,7 +232,7 @@ class Whatsapp(webdriver.Chrome):
                             if(contactFound == True):
                                 self.getConversation(path, contactName)
                     
-                                if(downloadMediaCheckbox == True):
+                                if(downloadMediaCheckbox == 1):
                                     os.chdir(DIRECTORY_CALLBACK)
                                     self.downloadMedia()
                                     print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
@@ -255,12 +255,12 @@ class Whatsapp(webdriver.Chrome):
     
 
     
-    def findChatToScrap(self, tree, pathToCSV, destinationPath):
+    def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox):
         
         print('Estraggo le chat dal file ' + pathToCSV)
         
-        unarchiveChatsCheckbox = False
-        downloadMediaCheckbox = True
+        # unarchiveChatsCheckbox = False
+        # downloadMediaCheckbox = True
         
         timestamp = self.getTimeStamp();
         os.chdir(destinationPath)
@@ -273,7 +273,7 @@ class Whatsapp(webdriver.Chrome):
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
         self.wait(40)
-        if(unarchiveChatsCheckbox == True):
+        if(unarchiveChatsCheckbox == 1):
             print('Unarchiving chats... \n')
             unarchivedContacts = self.unarchiveChats()
         
@@ -307,16 +307,18 @@ class Whatsapp(webdriver.Chrome):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     print('RIGA 309: Sono ancora nella cartella ' + os.getcwd() + ' e chiamo il metodo getConversation() \n')
                     self.getConversation(path, contactName, tree)
-                    print('FINE \n')
+                    print('########## FINE SCRAPING MESSAGGI ########## \n')
                     os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
-                    if(downloadMediaCheckbox == True):
+                    if(downloadMediaCheckbox == 1):
                         os.chdir(destinationPath)
                         self.downloadMedia()
                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
                         self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(path + "\\" + contactName)
+                        # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
+                        print('########## FINE SCRAPING MEDIA ########## \n')
                 else:
                     
                     while True:
@@ -350,7 +352,7 @@ class Whatsapp(webdriver.Chrome):
                                     self.getConversation(path, contactName, tree)
                                     self.execute_script(scriptGoBack)
                                 
-                                    if(downloadMediaCheckbox == True):
+                                    if(downloadMediaCheckbox == 1):
                                         os.chdir(path)
                                         self.downloadMedia()
                                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
@@ -374,7 +376,7 @@ class Whatsapp(webdriver.Chrome):
                             break
             
                     
-        if(unarchiveChatsCheckbox == True):
+        if(unarchiveChatsCheckbox == 1):
             print('Re-archiving chats... \n')
             self.archiveChats(unarchivedContacts)
      

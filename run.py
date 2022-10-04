@@ -57,10 +57,22 @@ def uploadContactsFile():
     
     
 def openBrowser():
-    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath)
+    print('Media checkbox = ' + str(mediaCheckBoxValue) + '\n')
+    print('Chat archiviate checkbox = ' + str(unarchiveChatsCheckbox) + '\n')
+    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, mediaCheckBoxValue, unarchiveChatsCheckbox)
     
     
+
+def getMediaCheckBoxValue():
+    global mediaCheckBoxValue
+    mediaCheckBoxValue = save_media.get()
     
+    
+def getArchivedChatsCheckBoxValue():
+    global unarchiveChatsCheckbox
+    unarchiveChatsCheckbox = archiviate.get()
+
+
 
 window = tk.Tk()
 window.geometry("900x625")
@@ -133,11 +145,11 @@ choose_2 = tk.Button(command=openBrowser)
 choose_2.grid(row=2, column=0, sticky="E", padx=30, pady=10)
 
 save_media = tk.IntVar()
-c1 = tk.Checkbutton(window, text='Scraping media', variable=save_media, onvalue=1, offvalue=0)
+c1 = tk.Checkbutton(window, text='Scraping media', variable=save_media, onvalue=1, offvalue=0, command=getMediaCheckBoxValue)
 c1.grid(row=1, column=0, stick="E", padx=200, pady=10)
 
 archiviate = tk.IntVar()
-c2 = tk.Checkbutton(window, variable=archiviate, onvalue=1, offvalue=0)
+c2 = tk.Checkbutton(window, variable=archiviate, onvalue=1, offvalue=0, command=getArchivedChatsCheckBoxValue)
 c2.grid(row=1, column=0, stick="E", padx=30, pady=10)
 
 v = tk.StringVar()

@@ -292,7 +292,7 @@ class Whatsapp(webdriver.Chrome):
             self.getAllChatsDefault(timestamp, downloadMediaCheckbox)
         else:
             for contactName in contactNamesFromCSV:
-        
+
                 print('Cercando ' + contactName + '... \n')
                 
                 chats = self.getContacts()
@@ -806,3 +806,5 @@ class Whatsapp(webdriver.Chrome):
                     else:
                         newDataFrame = pd.DataFrame([data], columns=HEADER_HASHING)
                         newDataFrame.to_csv(HASHING_CSV_FILE_NAME, mode='a', index=False, header=False, sep=";")
+        
+        os.chdir('..')

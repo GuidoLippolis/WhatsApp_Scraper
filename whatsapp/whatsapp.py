@@ -291,8 +291,6 @@ class Whatsapp(webdriver.Chrome):
                                 
                                 updatedList = self.updateList(chats, scrolledChats)
                                 
-                                scrolledChatsAsStrings = self.fillNameList(updatedList)
-                                
                                 contactFoundInScrolledChats = self.searchContactToClick(updatedList, contactName)
                                 
                                 if(contactFoundInScrolledChats == True):

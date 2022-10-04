@@ -206,12 +206,6 @@ class Whatsapp(webdriver.Chrome):
                     self.implicitly_wait(200)
                     scrolledChats = self.getContacts()
                     updatedList = self.updateList(chats, scrolledChats)
-                    for c in updatedList:
-                        if(len(c.get_attribute('title')) != 0):
-                            print(c.get_attribute('title'))
-                            print('\n')
-                        if("/" in c.get_attribute('title')):
-                            (c.get_attribute('title')).replace("/", "_")
                     
                     for scrolledChat in updatedList:
                         contactName = scrolledChat.get_attribute('title')

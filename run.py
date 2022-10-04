@@ -10,8 +10,6 @@ from configparser import ConfigParser
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
-import threading
-from tkinter import *
 
 from whatsapp.constants import CURRENT_LANGUAGE
 from whatsapp.constants import LANGUAGE
@@ -57,8 +55,6 @@ def uploadContactsFile():
     
     
 def openBrowser():
-    print('Media checkbox = ' + str(mediaCheckBoxValue) + '\n')
-    print('Chat archiviate checkbox = ' + str(unarchiveChatsCheckbox) + '\n')
     Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, mediaCheckBoxValue, unarchiveChatsCheckbox)
     
     

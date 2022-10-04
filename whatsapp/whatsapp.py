@@ -175,14 +175,6 @@ class Whatsapp(webdriver.Chrome):
         endOfSearch = False
         
         chats = self.getContacts()
-        newChats = []
-        
-        print('Prima dello scroll erano presenti: \n')
-        for c in chats:
-            if(len(c.get_attribute('title')) != 0):
-                print(c.get_attribute('title'))
-                print('\n')
-                
         
         for chat in chats:
             contactName = chat.get_attribute('title')
@@ -196,7 +188,6 @@ class Whatsapp(webdriver.Chrome):
                     if(downloadMediaCheckbox == 1):
                         os.chdir(DIRECTORY_CALLBACK)
                         self.downloadMedia()
-                        print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
                         self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                         self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
@@ -205,7 +196,6 @@ class Whatsapp(webdriver.Chrome):
         while True:
             updatedList = []
             nScrolls += 1
-            print('Scroll n. ' + str(nScrolls) + '... \n')
             pixels += PIXELS_TO_SCROLL
             self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
             new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
@@ -216,7 +206,6 @@ class Whatsapp(webdriver.Chrome):
                     self.implicitly_wait(200)
                     scrolledChats = self.getContacts()
                     updatedList = self.updateList(chats, scrolledChats)
-                    print('Dopo lo scroll ci sono: \n')
                     for c in updatedList:
                         if(len(c.get_attribute('title')) != 0):
                             print(c.get_attribute('title'))
@@ -235,7 +224,6 @@ class Whatsapp(webdriver.Chrome):
                                 if(downloadMediaCheckbox == 1):
                                     os.chdir(DIRECTORY_CALLBACK)
                                     self.downloadMedia()
-                                    print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
                                     self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
                                     self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
                                     self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
@@ -257,24 +245,16 @@ class Whatsapp(webdriver.Chrome):
     
     def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox):
         
-        print('Estraggo le chat dal file ' + pathToCSV)
-        
-        # unarchiveChatsCheckbox = False
-        # downloadMediaCheckbox = True
-        
         timestamp = self.getTimeStamp();
         os.chdir(destinationPath)
-        print('RIGA 267: Sono nella cartella ' + os.getcwd() + '\n')
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
         os.chdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
-        print('RIGA 271: Sono entrato nella cartella appena creata, ovvero ' + os.getcwd() + '\n')
         
         self.get(BASE_URL)
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
         self.wait(40)
         if(unarchiveChatsCheckbox == 1):
-            print('Unarchiving chats... \n')
             unarchivedContacts = self.unarchiveChats()
         
         endOfSearch = False
@@ -293,21 +273,14 @@ class Whatsapp(webdriver.Chrome):
         else:
             for contactName in contactNamesFromCSV:
 
-                print('Cercando ' + contactName + '... \n')
-                
                 chats = self.getContacts()
                 
-                print('Prima di scrollare erano presenti: \n')
                 chatsAsStrings = self.fillNameList(chats)
-                print(chatsAsStrings)
                 
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):
-                    print('Contatto trovato senza scrollare \n')
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
-                    print('RIGA 309: Sono ancora nella cartella ' + os.getcwd() + ' e chiamo il metodo getConversation() \n')
                     self.getConversation(path, contactName, tree)
-                    print('########## FINE SCRAPING MESSAGGI ########## \n')
                     os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == 1):
@@ -318,7 +291,6 @@ class Whatsapp(webdriver.Chrome):
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(path + "\\" + contactName)
                         # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
-                        print('########## FINE SCRAPING MEDIA ########## \n')
                 else:
                     
                     while True:
@@ -338,15 +310,9 @@ class Whatsapp(webdriver.Chrome):
                                 
                                 scrolledChatsAsStrings = self.fillNameList(updatedList)
                                 
-                                print('Dopo lo scroll n.' + str(nScrolls) + ' ci sono: \n')
-                                print(scrolledChatsAsStrings)
-                        
                                 contactFoundInScrolledChats = self.searchContactToClick(updatedList, contactName)
                                 
-                                print('Contact found = ' + str(contactFoundInScrolledChats))
-                                
                                 if(contactFoundInScrolledChats == True):
-                                    print('Contatto trovato allo scroll n. ' + str(nScrolls) + '\n')
                                     endOfSearch = True
                                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                                     self.getConversation(path, contactName, tree)
@@ -377,7 +343,6 @@ class Whatsapp(webdriver.Chrome):
             
                     
         if(unarchiveChatsCheckbox == 1):
-            print('Re-archiving chats... \n')
             self.archiveChats(unarchivedContacts)
      
     
@@ -653,9 +618,6 @@ class Whatsapp(webdriver.Chrome):
         tupla = (data[0], data[1], data[2], data[3])
         tree.insert('', tk.END, values=tupla)
         
-        # os.chdir(pathToCSV)
-        print('RIGA 654: Sono nella cartella ' + os.getcwd() + '\n')
-        
         if(not self.isFileNameValid(contactName)):
             contactName = self.renameFileOrFolderName(contactName)
             if not os.path.exists(contactName):
@@ -664,14 +626,8 @@ class Whatsapp(webdriver.Chrome):
             print('Sono entrato nella cartella del contatto ' + contactName + '\n')
         else:
             if not os.path.exists(contactName):
-                print('RIGA 664: La cartella ' + contactName + ' non esiste e la creo \n')
                 os.mkdir(contactName)
-                print('RIGA 666: Cartella ' + contactName + ' creata \n')
             os.chdir(contactName)
-            print('RIGA 668: Sono nella cartella ' + os.getcwd() + '\n')
-        
-        print('Writing new data to csv... \n')
-        print(data)
         
         if not os.path.exists(contactName + ".csv"):
             newDataFrame = pd.DataFrame([data], columns=HEADER)
@@ -732,24 +688,16 @@ class Whatsapp(webdriver.Chrome):
             
     def moveFilesToMainDirectory(self, destinationPath):
         
-        print('Sposto i file in ' + destinationPath)
-        
         os.chdir(DOWNLOADS_PATH)
         
         filesInDownloadsFolder = os.listdir()
         filteredFiles = [i for i in filesInDownloadsFolder if any(i for j in ACCEPTED_EXTENSIONS if str(j) in i)]
         
-        print('File filtrati: \n')
-        print(filteredFiles)
-        
         for fileName in filteredFiles:
             newFileName = self.fixFileName(fileName)
-            print('\n ######## newFileName = ' + newFileName + " ######## \n")
             if(pathlib.Path(newFileName).suffix in ACCEPTED_EXTENSIONS):
                 os.rename(fileName, newFileName)
                 shutil.move(newFileName, destinationPath)
-                print('\n Il file ' + fileName + " è ancora nella cartella Downloads: \n")
-                print(fileName in os.listdir())
             
         os.chdir(DIRECTORY_CALLBACK)
         
@@ -780,9 +728,6 @@ class Whatsapp(webdriver.Chrome):
                     
                     
     def zipHasher(self, path):
-        # os.chdir(path)
-        
-        print('Creating file ' + HASHING_CSV_FILE_NAME + '... \n')
         
         for fileName in os.listdir():
             
@@ -791,7 +736,6 @@ class Whatsapp(webdriver.Chrome):
             md5 = hashlib.md5()
             
             if(fileName.endswith(".zip")):
-                print('Sono sul file ' + fileName + '... \n')
                 with open(fileName, "rb") as f:
                     # Read and update hash string value in blocks of 4K
                     for chunk in iter(lambda: f.read(4096), b""):

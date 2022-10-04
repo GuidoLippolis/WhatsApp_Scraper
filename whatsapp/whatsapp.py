@@ -260,7 +260,7 @@ class Whatsapp(webdriver.Chrome):
         print('Estraggo le chat dal file ' + pathToCSV)
         
         unarchiveChatsCheckbox = False
-        downloadMediaCheckbox = False
+        downloadMediaCheckbox = True
         
         timestamp = self.getTimeStamp();
         os.chdir(destinationPath)
@@ -272,7 +272,7 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
-        self.wait(5)
+        self.wait(40)
         if(unarchiveChatsCheckbox == True):
             print('Unarchiving chats... \n')
             unarchivedContacts = self.unarchiveChats()
@@ -311,11 +311,11 @@ class Whatsapp(webdriver.Chrome):
                     os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == True):
-                        os.chdir(path)
+                        os.chdir(destinationPath)
                         self.downloadMedia()
                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                        self.moveFilesToMainDirectory(path + "\\" + contactName)
-                        self.zipFiles(path + "\\" + contactName, contactName)
+                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                        self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(path + "\\" + contactName)
                 else:
                     
@@ -778,7 +778,7 @@ class Whatsapp(webdriver.Chrome):
                     
                     
     def zipHasher(self, path):
-        os.chdir(path)
+        # os.chdir(path)
         
         print('Creating file ' + HASHING_CSV_FILE_NAME + '... \n')
         

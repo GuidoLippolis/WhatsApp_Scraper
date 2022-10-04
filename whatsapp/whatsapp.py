@@ -307,6 +307,8 @@ class Whatsapp(webdriver.Chrome):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     print('RIGA 309: Sono ancora nella cartella ' + os.getcwd() + ' e chiamo il metodo getConversation() \n')
                     self.getConversation(path, contactName, tree)
+                    print('FINE \n')
+                    os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == True):
                         os.chdir(path)

@@ -255,7 +255,7 @@ class Whatsapp(webdriver.Chrome):
     
 
     
-    def findChatToScrap(self, tree, pathToCSV):
+    def findChatToScrap(self, tree, pathToCSV, destinationPath):
         
         print('Estraggo le chat dal file ' + pathToCSV)
         
@@ -263,9 +263,11 @@ class Whatsapp(webdriver.Chrome):
         downloadMediaCheckbox = False
         
         timestamp = self.getTimeStamp();
+        os.chdir(destinationPath)
+        print('RIGA 267: Sono nella cartella ' + os.getcwd() + '\n')
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
-        
-        print("Ho creato la cartella: " + SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        os.chdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        print('RIGA 271: Sono entrato nella cartella appena creata, ovvero ' + os.getcwd() + '\n')
         
         self.get(BASE_URL)
         self.maximize_window()
@@ -284,7 +286,6 @@ class Whatsapp(webdriver.Chrome):
         
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
-        # contactNamesFromCSV = self.readContactsFromFile('./contatti.csv')
         contactNamesFromCSV = self.readContactsFromFile(pathToCSV)
         
         if(len(contactNamesFromCSV) == 0):
@@ -304,15 +305,16 @@ class Whatsapp(webdriver.Chrome):
                 if(contactFound == True):
                     print('Contatto trovato senza scrollare \n')
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                    print('RIGA 309: Sono ancora nella cartella ' + os.getcwd() + ' e chiamo il metodo getConversation() \n')
                     self.getConversation(path, contactName, tree)
                     
                     if(downloadMediaCheckbox == True):
-                        os.chdir(DIRECTORY_CALLBACK)
+                        os.chdir(path)
                         self.downloadMedia()
                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                        self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                        self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
-                        self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                        self.moveFilesToMainDirectory(path + "\\" + contactName)
+                        self.zipFiles(path + "\\" + contactName, contactName)
+                        self.zipHasher(path + "\\" + contactName)
                 else:
                     
                     while True:
@@ -347,13 +349,13 @@ class Whatsapp(webdriver.Chrome):
                                     self.execute_script(scriptGoBack)
                                 
                                     if(downloadMediaCheckbox == True):
-                                        os.chdir(DIRECTORY_CALLBACK)
+                                        os.chdir(path)
                                         self.downloadMedia()
                                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                                        self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                                        self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
+                                        self.moveFilesToMainDirectory(path + "\\" + contactName)
+                                        self.zipFiles(path + "\\" + contactName, contactName)
                                         self.execute_script(scriptGoBack)
-                                        self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                                        self.zipHasher(path + "\\" + contactName)
                                     
                                     break
                                 
@@ -463,8 +465,6 @@ class Whatsapp(webdriver.Chrome):
         sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
          
         for row in sortedMetadataDict:
-                # Getting back to the main directory
-            os.chdir(DIRECTORY_CALLBACK)
                 # Filling a list where data to be written in the .csv file are passed as input
             dataToAppend = []
             dataToAppend.append([
@@ -477,6 +477,8 @@ class Whatsapp(webdriver.Chrome):
                     # Message
                 row[2]
             ])
+            
+            print('RIGA 482: Chiamo il metodo makeCSV() a cui passo il percorso ' + pathToCSV + '\n')
                 # A .csv file named as the contact name the scraper is processing is created
             self.makeCSV(dataToAppend[0], pathToCSV, contactName, tree)
     
@@ -647,16 +649,22 @@ class Whatsapp(webdriver.Chrome):
         tupla = (data[0], data[1], data[2], data[3])
         tree.insert('', tk.END, values=tupla)
         
-        os.chdir(pathToCSV)
+        # os.chdir(pathToCSV)
+        print('RIGA 654: Sono nella cartella ' + os.getcwd() + '\n')
+        
         if(not self.isFileNameValid(contactName)):
             contactName = self.renameFileOrFolderName(contactName)
             if not os.path.exists(contactName):
                 os.mkdir(contactName)
             os.chdir(contactName)
+            print('Sono entrato nella cartella del contatto ' + contactName + '\n')
         else:
             if not os.path.exists(contactName):
+                print('RIGA 664: La cartella ' + contactName + ' non esiste e la creo \n')
                 os.mkdir(contactName)
+                print('RIGA 666: Cartella ' + contactName + ' creata \n')
             os.chdir(contactName)
+            print('RIGA 668: Sono nella cartella ' + os.getcwd() + '\n')
         
         print('Writing new data to csv... \n')
         print(data)
@@ -667,6 +675,8 @@ class Whatsapp(webdriver.Chrome):
         else:
             newDataFrame = pd.DataFrame([data], columns=HEADER)
             newDataFrame.to_csv(contactName + ".csv", mode='a', index=False, header=False, sep=";")
+            
+        os.chdir('..')
         
         
      

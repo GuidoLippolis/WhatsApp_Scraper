@@ -42,8 +42,10 @@ def changeLanguage(index, value, op):
 
 
 def selectDestinationFolder():
+    global destinationPath
     path = filedialog.askdirectory()
     choose_dest_label.configure(text=path)
+    destinationPath = path
 
 
 def uploadContactsFile():
@@ -55,7 +57,7 @@ def uploadContactsFile():
     
     
 def openBrowser():
-    Whatsapp().findChatToScrap(tree, pathToCSV)
+    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath)
     
     
     

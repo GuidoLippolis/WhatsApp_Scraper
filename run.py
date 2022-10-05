@@ -11,6 +11,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 
+import json
+
 from whatsapp.constants import CURRENT_LANGUAGE
 from whatsapp.constants import LANGUAGE
 
@@ -19,17 +21,36 @@ config = ConfigParser()
 config.read(configurationFile)
 
 def changeLanguage(index, value, op):
+    
+    global states
+    global statesDict
     global stateLabel
+    
     config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
+    
     with open(configurationFile, 'w') as file:
         config.write(file)
+        
+    # -------- TEST --------
+    
+    states = json.loads(config.get(config[LANGUAGE][CURRENT_LANGUAGE],"stati"))
+    statesDict = dict(states)
+    
+    stateLabel = output_label_2.cget('text')
+    print('Lo stato iniziale è ' + stateLabel)
+    print('Length = ' + str(len(stateLabel)))
+    
+    print('Dizionario = ')
+    print(statesDict)
+    
+    # -------- TEST --------
+    
     tree.heading(0, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
     tree.heading(1, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
     tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
     tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
-    output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stato'])
     
-    stateLabel = output_label_2.cget('text')
+    output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stati'])
     
     credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
     label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
@@ -38,6 +59,7 @@ def changeLanguage(index, value, op):
     c2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['chat_archiviate'])
     choose_dest.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['destinazione'])
     config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
+    
     with open(configurationFile, 'w') as file:
         config.write(file)
     return
@@ -60,7 +82,7 @@ def uploadContactsFile():
     
 def openBrowser():
     print('Lunghezza nome file = ' + str(len(pathToCSV)))
-    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(), archiviate.get(), stateLabel)
+    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(), archiviate.get(), statesDict, stateLabel)
 
 
 

@@ -229,7 +229,8 @@ class Whatsapp(webdriver.Chrome):
     
 
     
-    def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output):
+    def findChatToScrap(self, tree, pathToCSV, destinationPath, 
+                        downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output):
 
         
         timestamp = self.getTimeStamp();

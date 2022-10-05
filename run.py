@@ -43,9 +43,7 @@ def changeLanguage(index, value, op):
     tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
     
     output = output_label_2
-    print('Tipo di output = ')
-    print(type(output))
-
+    
     credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
     label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
     choose_1.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['lista_contatti'])
@@ -117,7 +115,7 @@ title.grid(row=0, column=0, sticky="N", padx=20, pady=10)
 output_label = tk.Label(text="Log: ")
 output_label.grid(row=6, column=0, sticky="W", padx=10, pady=10)
 
-output_label_2 = tk.Label(bg="white", fg="black", borderwidth=2, relief="groove", anchor='w')
+output_label_2 = tk.Label(text='WhatsApp Scraper', bg="white", fg="black", borderwidth=2, relief="groove", anchor='w')
 output_label_2.configure(width=50)
 output_label_2.grid(row=6, column=0, sticky="W", padx=45, pady=10)
 

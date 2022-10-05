@@ -19,6 +19,7 @@ config = ConfigParser()
 config.read(configurationFile)
 
 def changeLanguage(index, value, op):
+    global stateLabel
     config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     with open(configurationFile, 'w') as file:
         config.write(file)
@@ -27,6 +28,9 @@ def changeLanguage(index, value, op):
     tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
     tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
     output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stato'])
+    
+    stateLabel = output_label_2.cget('text')
+    
     credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
     label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
     choose_1.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['lista_contatti'])
@@ -48,25 +52,15 @@ def selectDestinationFolder():
 
 def uploadContactsFile():
     global pathToCSV
+    pathToCSV = ''
     filename = filedialog.askopenfilename(filetypes=(("CSV files", "*.csv*"), ("all files", "*.*")))
     choose_label.configure(text=filename)
     pathToCSV = filename
     
     
-    
 def openBrowser():
-    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, mediaCheckBoxValue, unarchiveChatsCheckbox)
-    
-    
-
-def getMediaCheckBoxValue():
-    global mediaCheckBoxValue
-    mediaCheckBoxValue = save_media.get()
-    
-    
-def getArchivedChatsCheckBoxValue():
-    global unarchiveChatsCheckbox
-    unarchiveChatsCheckbox = archiviate.get()
+    print('Lunghezza nome file = ' + str(len(pathToCSV)))
+    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(), archiviate.get(), stateLabel)
 
 
 
@@ -141,11 +135,11 @@ choose_2 = tk.Button(command=openBrowser)
 choose_2.grid(row=2, column=0, sticky="E", padx=30, pady=10)
 
 save_media = tk.IntVar()
-c1 = tk.Checkbutton(window, text='Scraping media', variable=save_media, onvalue=1, offvalue=0, command=getMediaCheckBoxValue)
+c1 = tk.Checkbutton(window, text='Scraping media', variable=save_media, onvalue=1, offvalue=0)
 c1.grid(row=1, column=0, stick="E", padx=200, pady=10)
 
 archiviate = tk.IntVar()
-c2 = tk.Checkbutton(window, variable=archiviate, onvalue=1, offvalue=0, command=getArchivedChatsCheckBoxValue)
+c2 = tk.Checkbutton(window, variable=archiviate, onvalue=1, offvalue=0)
 c2.grid(row=1, column=0, stick="E", padx=30, pady=10)
 
 v = tk.StringVar()

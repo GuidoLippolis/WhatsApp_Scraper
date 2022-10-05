@@ -156,7 +156,7 @@ class Whatsapp(webdriver.Chrome):
           
 
 
-    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox):
+    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox, tree):
         
         pixels = 0
         pre_height = 0
@@ -174,7 +174,7 @@ class Whatsapp(webdriver.Chrome):
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):
-                    self.getConversation(path, contactName)
+                    self.getConversation(path, contactName, tree)
                 
                     if(downloadMediaCheckbox == 1):
                         os.chdir(DIRECTORY_CALLBACK)
@@ -204,7 +204,7 @@ class Whatsapp(webdriver.Chrome):
                             path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                             contactFound = self.searchContactToClick(scrolledChats, contactName)
                             if(contactFound == True):
-                                self.getConversation(path, contactName)
+                                self.getConversation(path, contactName, tree)
                     
                                 if(downloadMediaCheckbox == 1):
                                     os.chdir(DIRECTORY_CALLBACK)
@@ -228,7 +228,7 @@ class Whatsapp(webdriver.Chrome):
     
 
     
-    def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox):
+    def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox, stateLabel):
         
         timestamp = self.getTimeStamp();
         os.chdir(destinationPath)
@@ -238,7 +238,8 @@ class Whatsapp(webdriver.Chrome):
         self.get(BASE_URL)
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
-        self.wait(40)
+        self.wait(5)
+        
         if(unarchiveChatsCheckbox == 1):
             unarchivedContacts = self.unarchiveChats()
         
@@ -251,11 +252,15 @@ class Whatsapp(webdriver.Chrome):
         
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
-        contactNamesFromCSV = self.readContactsFromFile(pathToCSV)
+        if(len(pathToCSV) != 0):
+            
+            print('Hai caricato il file \n')
         
-        if(len(contactNamesFromCSV) == 0):
-            self.getAllChatsDefault(timestamp, downloadMediaCheckbox)
-        else:
+            contactNamesFromCSV = self.readContactsFromFile(pathToCSV)
+            
+            # if(len(contactNamesFromCSV) == 0):
+                # self.getAllChatsDefault(timestamp, downloadMediaCheckbox)
+            # else:
             for contactName in contactNamesFromCSV:
 
                 chats = self.getContacts()
@@ -303,8 +308,8 @@ class Whatsapp(webdriver.Chrome):
                                         os.chdir(path)
                                         self.downloadMedia()
                                         print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
-                                        self.moveFilesToMainDirectory(path + "\\" + contactName)
-                                        self.zipFiles(path + "\\" + contactName, contactName)
+                                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                                        self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                                         self.execute_script(scriptGoBack)
                                         self.zipHasher(path + "\\" + contactName)
                                     
@@ -321,7 +326,10 @@ class Whatsapp(webdriver.Chrome):
                             pre_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
                         else:
                             break
-            
+        
+        else:
+            print('Nessun file caricato \n')
+            self.getAllChatsDefault(timestamp, downloadMediaCheckbox, tree)
                     
         if(unarchiveChatsCheckbox == 1):
             self.archiveChats(unarchivedContacts)
@@ -428,7 +436,6 @@ class Whatsapp(webdriver.Chrome):
                 row[2]
             ])
             
-            print('RIGA 482: Chiamo il metodo makeCSV() a cui passo il percorso ' + pathToCSV + '\n')
                 # A .csv file named as the contact name the scraper is processing is created
             self.makeCSV(dataToAppend[0], pathToCSV, contactName, tree)
     

@@ -25,6 +25,7 @@ def changeLanguage(index, value, op):
     global states
     global statesDict
     global stateLabel
+    global output
     
     config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     
@@ -36,12 +37,9 @@ def changeLanguage(index, value, op):
     states = json.loads(config.get(config[LANGUAGE][CURRENT_LANGUAGE],"stati"))
     statesDict = dict(states)
     
-    stateLabel = output_label_2.cget('text')
-    print('Lo stato iniziale è ' + stateLabel)
-    print('Length = ' + str(len(stateLabel)))
-    
     print('Dizionario = ')
     print(statesDict)
+    print('\n')
     
     # -------- TEST --------
     
@@ -50,8 +48,17 @@ def changeLanguage(index, value, op):
     tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
     tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
     
-    output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stati'])
+    # output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stati'])
+    # output = output_label_2.config()
+    # print('tipo di output2 = ')
+    # print(type(output_label_2))
     
+    # stateLabel = output_label_2.cget('text')
+    
+    output = output_label_2
+    print('Tipo di output = ')
+    print(type(output))
+
     credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
     label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
     choose_1.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['lista_contatti'])
@@ -82,7 +89,7 @@ def uploadContactsFile():
     
 def openBrowser():
     print('Lunghezza nome file = ' + str(len(pathToCSV)))
-    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(), archiviate.get(), statesDict, stateLabel)
+    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(), archiviate.get(), statesDict, output)
 
 
 

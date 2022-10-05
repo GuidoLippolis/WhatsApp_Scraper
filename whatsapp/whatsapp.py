@@ -228,7 +228,8 @@ class Whatsapp(webdriver.Chrome):
     
 
     
-    def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, stateLabel):
+    def findChatToScrap(self, tree, pathToCSV, destinationPath, downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output):
+
         
         timestamp = self.getTimeStamp();
         os.chdir(destinationPath)
@@ -242,6 +243,7 @@ class Whatsapp(webdriver.Chrome):
         print('Stato di caricamento = ')
         print(statesDict['caricamento'])
         self.wait(40)
+        output.config(text=statesDict['caricamento'])
         
         if(unarchiveChatsCheckbox == 1):
             # Stato chat in stato di archiviazione

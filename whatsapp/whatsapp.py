@@ -242,8 +242,8 @@ class Whatsapp(webdriver.Chrome):
         # Stato di caricamento (da file di lingua)
         print('Stato di caricamento = ')
         print(statesDict['caricamento'])
-        self.wait(40)
         output.config(text=statesDict['caricamento'])
+        self.wait(40)
         
         if(unarchiveChatsCheckbox == 1):
             # Stato chat in stato di archiviazione

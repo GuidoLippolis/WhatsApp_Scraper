@@ -16,6 +16,8 @@ import json
 from whatsapp.constants import CURRENT_LANGUAGE
 from whatsapp.constants import LANGUAGE
 
+import threading
+
 configurationFile = 'properties/language.ini'
 config = ConfigParser()
 config.read(configurationFile)
@@ -160,7 +162,7 @@ choose_label = tk.Label(text="", bg="white", fg="black", borderwidth=2, relief="
 choose_label.configure(width=55)
 choose_label.grid(row=1, column=0, sticky="W", padx=185, pady=10)
 
-choose_2 = tk.Button(command=openBrowser)
+choose_2 = tk.Button(command=lambda: threading.Thread(target=openBrowser).start())
 choose_2.grid(row=2, column=0, sticky="E", padx=30, pady=10)
 
 save_media = tk.IntVar()

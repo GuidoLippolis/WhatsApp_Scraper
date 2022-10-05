@@ -15,6 +15,7 @@ import json
 
 from whatsapp.constants import CURRENT_LANGUAGE
 from whatsapp.constants import LANGUAGE
+from whatsapp.constants import SUPPORTED_LANGUAGES
 
 import threading
 
@@ -158,12 +159,7 @@ c2.grid(row=1, column=0, stick="E", padx=30, pady=10)
 
 v = tk.StringVar()
 v.trace('w', changeLanguage)
-comboLang = ttk.Combobox(window, textvar=v, state="readonly",
-                         values=[
-                             "English",
-                             "Italiano",
-                             "Francais",
-                             "Deutsch"])
+comboLang = ttk.Combobox(window, textvar=v, state="readonly", values=SUPPORTED_LANGUAGES)
 comboLang.grid(row=0, column=0, sticky="W", padx=10, pady=10)
 comboLang.set(config[LANGUAGE][CURRENT_LANGUAGE])
 

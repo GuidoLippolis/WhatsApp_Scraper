@@ -87,7 +87,7 @@ XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS = '//button//span[contains(@data-testid,"dow
 XPATH_UNARCHIVE_BUTTON = '//li[contains(@data-testid, "mi-archive")]'
 
 # XPath PDF list
-XPATH_PDF_LIST = '//button[contains(@data-testid,"document-thumb")]'
+XPATH_DOC_LIST = '//button[contains(@data-testid,"document-thumb")]'
 
 # Accepted extensions
 ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf"]
@@ -116,3 +116,6 @@ CURRENT_LANGUAGE = "lingua_corrente"
 
 # Language section in config file
 LANGUAGE = 'Lingua'
+
+# Supported languages
+SUPPORTED_LANGUAGES = ["English", "Italiano", "Francais", "Deutsch"]

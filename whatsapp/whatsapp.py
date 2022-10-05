@@ -49,7 +49,7 @@ from whatsapp.constants import XPATH_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS
 from whatsapp.constants import XPATH_UNARCHIVE_BUTTON
 from whatsapp.constants import DOWNLOADS_PATH
-from whatsapp.constants import XPATH_PDF_LIST
+from whatsapp.constants import XPATH_DOC_LIST
 from whatsapp.constants import ACCEPTED_EXTENSIONS
 from whatsapp.constants import XPATH_CHAT_FILTER_BUTTON
 from whatsapp.constants import MULTIMEDIA_ZIP_NAME
@@ -157,7 +157,7 @@ class Whatsapp(webdriver.Chrome):
           
 
 
-    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox, tree):
+    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox, tree, destinationPath, statesDict, output):
         
         pixels = 0
         pre_height = 0
@@ -175,14 +175,19 @@ class Whatsapp(webdriver.Chrome):
                 path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):
+                    # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
                     self.getConversation(path, contactName, tree)
                 
                     if(downloadMediaCheckbox == 1):
-                        os.chdir(DIRECTORY_CALLBACK)
-                        self.downloadMedia()
-                        self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                        self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
-                        self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                        # Torno nella cartella ../Output/
+                        os.chdir(destinationPath)
+                        self.downloadMedia(statesDict, output)
+                        # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
+                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                        # I file vengono zippati nella stessa cartella
+                        self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
+                        self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
+                        # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                 
         
         while True:
@@ -205,14 +210,19 @@ class Whatsapp(webdriver.Chrome):
                             path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                             contactFound = self.searchContactToClick(scrolledChats, contactName)
                             if(contactFound == True):
+                                # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
                                 self.getConversation(path, contactName, tree)
                     
                                 if(downloadMediaCheckbox == 1):
-                                    os.chdir(DIRECTORY_CALLBACK)
-                                    self.downloadMedia()
-                                    self.moveFilesToMainDirectory(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
-                                    self.zipFiles(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName, contactName)
-                                    self.zipHasher(DIRECTORY_CALLBACK + "\\" + path + "\\" + contactName)
+                                    # Torno nella cartella ../Output/
+                                    os.chdir(destinationPath)
+                                    self.downloadMedia(statesDict, output)
+                                    # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
+                                    self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                                    # I file vengono zippati nella stessa cartella
+                                    self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
+                                    self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
+                                    # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                             break
                     break
@@ -234,21 +244,20 @@ class Whatsapp(webdriver.Chrome):
 
         
         timestamp = self.getTimeStamp();
+        # Entro nella cartella di destinazione (es. ../Output/)
         os.chdir(destinationPath)
+        # Creo la cartella SCRAPED_timestamp
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        # Ci entro (../Output/SCRAPED_timestamp/)
         os.chdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
         
         self.get(BASE_URL)
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
-        # Stato di caricamento (da file di lingua)
-        print('Stato di caricamento = ')
-        print(statesDict['caricamento'])
         output.config(text=statesDict['caricamento'])
         self.wait(40)
         
         if(unarchiveChatsCheckbox == 1):
-            # Stato chat in stato di archiviazione
             unarchivedContacts = self.unarchiveChats()
         
         endOfSearch = False
@@ -266,9 +275,6 @@ class Whatsapp(webdriver.Chrome):
         
             contactNamesFromCSV = self.readContactsFromFile(pathToCSV)
             
-            # if(len(contactNamesFromCSV) == 0):
-                # self.getAllChatsDefault(timestamp, downloadMediaCheckbox)
-            # else:
             for contactName in contactNamesFromCSV:
 
                 chats = self.getContacts()
@@ -276,16 +282,19 @@ class Whatsapp(webdriver.Chrome):
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
+                    # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
                     self.getConversation(path, contactName, tree)
                     os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == 1):
+                        # Torno nella cartella ../Output/
                         os.chdir(destinationPath)
-                        self.downloadMedia()
-                        print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                        self.downloadMedia(statesDict, output)
+                        # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
                         self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                        # I file vengono zippati nella stessa cartella
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
-                        self.zipHasher(path + "\\" + contactName)
+                        self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
                         # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                 else:
                     
@@ -310,16 +319,19 @@ class Whatsapp(webdriver.Chrome):
                                     endOfSearch = True
                                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                                     self.getConversation(path, contactName, tree)
+                                    os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                                     self.execute_script(scriptGoBack)
                                 
                                     if(downloadMediaCheckbox == 1):
-                                        os.chdir(path)
-                                        self.downloadMedia()
-                                        print('Devo spostare i file: sono in ' + os.getcwd() + "\n")
+                                        # Torno nella cartella ../Output/
+                                        os.chdir(destinationPath)
+                                        self.downloadMedia(statesDict, output)
+                                        # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
                                         self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                                        # I file vengono zippati nella stessa cartella
                                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
-                                        self.execute_script(scriptGoBack)
                                         self.zipHasher(path + "\\" + contactName)
+                                        self.execute_script(scriptGoBack)
                                     
                                     break
                                 
@@ -336,8 +348,7 @@ class Whatsapp(webdriver.Chrome):
                             break
         
         else:
-            print('Nessun file caricato \n')
-            self.getAllChatsDefault(timestamp, downloadMediaCheckbox, tree)
+            self.getAllChatsDefault(timestamp, downloadMediaCheckbox, tree, destinationPath, statesDict, output)
                     
         if(unarchiveChatsCheckbox == 1):
             self.archiveChats(unarchivedContacts)
@@ -448,6 +459,7 @@ class Whatsapp(webdriver.Chrome):
                         row[2]
                     ])
                     
+                    # A questo punto, siamo nella cartella /SCRAPED_timestamp/
                         # A .csv file named as the contact name the scraper is processing is created
                     self.makeCSV(dataToAppend[0], pathToCSV, contactName, tree)
                 
@@ -483,20 +495,21 @@ class Whatsapp(webdriver.Chrome):
      
     
     
-    def downloadMedia(self):
+    def downloadMedia(self, statesDict, output):
         
-        self.downloadAudios()
-        self.downloadImages()
-        self.downloadVideos()
-        self.downloadDocuments()
+        self.downloadAudios(statesDict, output)
+        self.downloadImages(statesDict, output)
+        self.downloadVideos(statesDict, output)
+        self.downloadDocuments(statesDict, output)
     
 
 
-    def downloadAudios(self):
+    def downloadAudios(self, statesDict, output):
         
-        print('Downloading audios... \n')
+        # print('Downloading audios... \n')
+        output.config(text=statesDict['aud'])
         
-        # self.wait(10)
+        self.wait(10)
         
         try:
             audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
@@ -527,8 +540,12 @@ class Whatsapp(webdriver.Chrome):
         
 
 
-    def downloadImages(self):
-        print('Download images method called \n')
+    def downloadImages(self, statesDict, output):
+        # print('Download images method called \n')
+        output.config(text=statesDict['img'])
+        
+        self.wait(10)
+        
         try:
             images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
             
@@ -559,7 +576,10 @@ class Whatsapp(webdriver.Chrome):
         
     
     
-    def downloadVideos(self):
+    def downloadVideos(self, statesDict, output):
+        output.config(text=statesDict['vid'])
+        
+        self.wait(10)
         
         try:
             
@@ -592,19 +612,24 @@ class Whatsapp(webdriver.Chrome):
             
            
             
-    def downloadDocuments(self):
+    def downloadDocuments(self, statesDict, output):
+        output.config(text=statesDict['doc'])
+        
+        self.wait(10)
         
         try:
             
-            pdfList = self.find_elements(by=By.XPATH, value=XPATH_PDF_LIST)
+            docList = self.find_elements(by=By.XPATH, value=XPATH_DOC_LIST)
             
-            if(len(pdfList) != 0):
-                print(str(len(pdfList)) + ' PDF(s) found... \n')
-                for pdf in pdfList:
+            if(len(docList) != 0):
+                print(str(len(docList)) + ' PDF(s) found... \n')
+                for doc in docList:
                     
                     self.wait(3)
                     
-                    pdf.click()
+                    doc.click()
+                    
+                    self.wait(3)
                     
             else:
                 raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI! \n")
@@ -636,7 +661,8 @@ class Whatsapp(webdriver.Chrome):
         else:
             newDataFrame = pd.DataFrame([data], columns=HEADER)
             newDataFrame.to_csv(contactName + ".csv", mode='a', index=False, header=False, sep=";")
-            
+        
+        # Una volta aggiornato il file .csv, torno indietro di un livello
         os.chdir('..')
         
         
@@ -726,9 +752,13 @@ class Whatsapp(webdriver.Chrome):
                 if(file == contactName + ".csv" and not file.endswith(".zip")):
                     f.write(file)
                     
+        os.chdir('..')       
                     
                     
     def zipHasher(self, path):
+        
+        # Entro nella cartella del contatto
+        os.chdir(path)
         
         for fileName in os.listdir():
             

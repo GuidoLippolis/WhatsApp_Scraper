@@ -64,6 +64,7 @@ from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
 from whatsapp.exceptions.AudioNotFoundException import AudioNotFoundException
 from whatsapp.exceptions.DocumentNotFoundException import DocumentNotFoundException
 from whatsapp.exceptions.ArchivedChatsButtonNotFoundException import ArchivedChatsButtonNotFoundException
+from whatsapp.exceptions.NoMessagesException import NoMessagesException
 
 class Whatsapp(webdriver.Chrome):
     
@@ -406,46 +407,51 @@ class Whatsapp(webdriver.Chrome):
     
     def getConversation(self, pathToCSV, contactName, tree):
         
-        print('Getting conversation with ' + contactName + '... \n')
+        try:
         
-        messageMetadataList = []
-        # Retrieving all divs containing text messages
-        messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
-        
-        # Retrieving text messages
-        textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
-        
-        for message in messages:
+            messageMetadataList = []
+            # Retrieving all divs containing text messages
+            messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
             
-            # Getting metadata for every message (sender, date and hour)
-            metadata = message.find_element(
-                by=By.XPATH,    
-                value=XPATH_SENDER
-            ).get_attribute("data-pre-plain-text")
+            # Retrieving text messages
+            textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
             
-            messageMetadataList.append(metadata)
-
-        # Messages are sorted in descending order (if the last attribute is set to "True")
-        sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
-         
-        for row in sortedMetadataDict:
-                # Filling a list where data to be written in the .csv file are passed as input
-            dataToAppend = []
-            dataToAppend.append([
-                    # Date
-                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
-                    # Hour
-                (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
-                    # Sender
-                row[1],
-                    # Message
-                row[2]
-            ])
+            if(len(messages) == 0 or len(textMessages) == 0):
+                raise NoMessagesException("ERRORE! QUESTA CHAT NON CONTIENE MESSAGGI DI TESTO!")
+            else:
             
-                # A .csv file named as the contact name the scraper is processing is created
-            self.makeCSV(dataToAppend[0], pathToCSV, contactName, tree)
-    
+                for message in messages:
+                    
+                    # Getting metadata for every message (sender, date and hour)
+                    metadata = message.find_element(
+                        by=By.XPATH,    
+                        value=XPATH_SENDER
+                    ).get_attribute("data-pre-plain-text")
+                    
+                    messageMetadataList.append(metadata)
         
+                # Messages are sorted in descending order (if the last attribute is set to "True")
+                sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
+                 
+                for row in sortedMetadataDict:
+                        # Filling a list where data to be written in the .csv file are passed as input
+                    dataToAppend = []
+                    dataToAppend.append([
+                            # Date
+                        (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[0],
+                            # Hour
+                        (row[0].strftime(MESSAGE_METADATA_FORMAT)).split(" ")[1],
+                            # Sender
+                        row[1],
+                            # Message
+                        row[2]
+                    ])
+                    
+                        # A .csv file named as the contact name the scraper is processing is created
+                    self.makeCSV(dataToAppend[0], pathToCSV, contactName, tree)
+                
+        except NoMessagesException as nme:
+            print(nme)
     
     def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
         

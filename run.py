@@ -34,28 +34,13 @@ def changeLanguage(index, value, op):
     with open(configurationFile, 'w') as file:
         config.write(file)
         
-    # -------- TEST --------
-    
     states = json.loads(config.get(config[LANGUAGE][CURRENT_LANGUAGE],"stati"))
     statesDict = dict(states)
-    
-    print('Dizionario = ')
-    print(statesDict)
-    print('\n')
-    
-    # -------- TEST --------
     
     tree.heading(0, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
     tree.heading(1, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
     tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
     tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
-    
-    # output_label_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['stati'])
-    # output = output_label_2.config()
-    # print('tipo di output2 = ')
-    # print(type(output_label_2))
-    
-    # stateLabel = output_label_2.cget('text')
     
     output = output_label_2
     print('Tipo di output = ')

@@ -41,8 +41,10 @@ from whatsapp.constants import VIDEO_PLAY_BUTTON_XPATH
 from whatsapp.constants import DOWNLOAD_BUTTON_XPATH
 from whatsapp.constants import CLOSE_BUTTON_MEDIA_XPATH
 from whatsapp.constants import MESSAGE_METADATA_FORMAT
+from whatsapp.constants import MESSAGE_METADATA_FORMAT_ENGLISH
 from whatsapp.constants import XPATH_IMAGES
 from whatsapp.constants import XPATH_AUDIOS
+from whatsapp.constants import XPATH_GIFS
 from whatsapp.constants import XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS
 from whatsapp.constants import XPATH_DOWNLOAD_AUDIOS
 from whatsapp.constants import XPATH_ARCHIVED_CHATS
@@ -240,7 +242,7 @@ class Whatsapp(webdriver.Chrome):
 
     
     def findChatToScrap(self, tree, pathToCSV, destinationPath, 
-                        downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output):
+                        downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output, language):
 
         
         timestamp = self.getTimeStamp();
@@ -283,7 +285,7 @@ class Whatsapp(webdriver.Chrome):
                 if(contactFound == True):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
-                    self.getConversation(path, contactName, tree)
+                    self.getConversation(path, contactName, tree, language)
                     os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == 1):
@@ -417,7 +419,7 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def getConversation(self, pathToCSV, contactName, tree):
+    def getConversation(self, pathToCSV, contactName, tree, language):
         
         try:
         
@@ -443,7 +445,7 @@ class Whatsapp(webdriver.Chrome):
                     messageMetadataList.append(metadata)
         
                 # Messages are sorted in descending order (if the last attribute is set to "True")
-                sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
+                sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True, language)
                  
                 for row in sortedMetadataDict:
                         # Filling a list where data to be written in the .csv file are passed as input
@@ -466,14 +468,20 @@ class Whatsapp(webdriver.Chrome):
         except NoMessagesException as nme:
             print(nme)
     
-    def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
+    def sortMessagesByTime(self, messageMetadataList, textMessages, reverse, language):
         
         metadataDict = []
         finalDict = []
         
         for metadata in messageMetadataList:
+            
             timeStr = self.getDateAsString(metadata) + ' ' + self.getHourAsString(metadata)
-            timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT)
+            
+            if(language == 'Italian'):
+                timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT)
+            elif(language == 'English'):
+                timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT_ENGLISH)
+                
             sender = self.getSender(metadata)
             metadataDict.append((timeObj, sender))
         
@@ -497,6 +505,7 @@ class Whatsapp(webdriver.Chrome):
     
     def downloadMedia(self, statesDict, output):
         
+        self.downloadGIF(statesDict, output)
         self.downloadAudios(statesDict, output)
         self.downloadImages(statesDict, output)
         self.downloadVideos(statesDict, output)
@@ -636,6 +645,47 @@ class Whatsapp(webdriver.Chrome):
         
         except DocumentNotFoundException as dnf:
             print(dnf)
+            
+            
+            
+    def downloadGIF(self, statesDict, output):
+        output.config(text=statesDict['doc'])
+        
+        self.wait(10)
+        
+        try:
+            
+            GIFList = self.find_elements(by=By.XPATH, value=XPATH_GIFS)
+            
+            if(len(GIFList) != 0):
+                print(str(len(GIFList)) + ' GIF(s) found... \n')
+                for gif in GIFList:
+                    
+                    self.wait(3)
+                    
+                    ActionChains(self).move_to_element(gif).perform()
+                    
+                    self.wait(3)
+                    
+                    dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
+                    
+                    self.wait(3)
+                    
+                    dropDownMenu.click()
+                    
+                    self.wait(3)
+                    
+                    downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
+                    
+                    downloadButton.click()
+                    
+                    self.wait(3)
+                    
+            else:
+                raise DocumentNotFoundException("ERRORE! GIF NON PRESENTI! \n")
+        
+        except DocumentNotFoundException as dnf:
+            print(dnf)
     
     
     
@@ -688,8 +738,8 @@ class Whatsapp(webdriver.Chrome):
     
     
     def getDateAsString(self, messageMetadata):
-        return (messageMetadata.split(", ")[1]).split("]")[0]  
-        
+        return (messageMetadata.split(", ")[1]).split("]")[0]
+    
     
     
     def getTimeStamp(self):

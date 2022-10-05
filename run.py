@@ -29,6 +29,7 @@ def changeLanguage(index, value, op):
     global statesDict
     global stateLabel
     global output
+    global language
     
     config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     
@@ -44,6 +45,8 @@ def changeLanguage(index, value, op):
     tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
     
     output = output_label_2
+    
+    language = config[LANGUAGE][CURRENT_LANGUAGE]
     
     credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
     label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
@@ -75,7 +78,8 @@ def uploadContactsFile():
     
 def openBrowser():
     print('Lunghezza nome file = ' + str(len(pathToCSV)))
-    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(), archiviate.get(), statesDict, output)
+    Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(),
+                               archiviate.get(), statesDict, output, language)
 
 
 

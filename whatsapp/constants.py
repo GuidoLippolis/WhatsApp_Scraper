@@ -62,11 +62,17 @@ CLOSE_BUTTON_MEDIA_XPATH = "//span[contains(@data-testid, 'x-viewer')]"
 # Format for message metadata
 MESSAGE_METADATA_FORMAT = '%d/%m/%Y %H:%M'
 
+# English date format
+MESSAGE_METADATA_FORMAT_ENGLISH = '%m/%d/%Y %H:%M'
+
 # XPath for image tags
 XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb')]"
 
 # XPath for audio play buttons
 XPATH_AUDIOS = "//span[contains(@data-testid, 'audio-play')]"
+
+# XPath for GIFs
+XPATH_GIFS = "//div[contains(@data-testid, 'media-state-gif-icon')]"
 
 # XPath for drop down menu for downloading audios
 XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//div[contains(@data-testid, 'icon-down-context')]"

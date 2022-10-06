@@ -19,7 +19,7 @@ from whatsapp.constants import SUPPORTED_LANGUAGES
 
 import threading
 
-configurationFile = 'properties/language.ini'
+configurationFile = 'language.ini'
 config = ConfigParser()
 config.read(configurationFile)
 

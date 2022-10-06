@@ -283,17 +283,26 @@ class Whatsapp(webdriver.Chrome):
                 
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):
+                    
+                    print('\n ##### CONTATTO TROVATO ##### \n')
+                    
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
+                    print('\n ##### STO PER CHIAMARE LA FUNZIONE getConversation() ##### \n')
                     self.getConversation(path, contactName, tree, language)
-                    os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
+                    # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == 1):
                         # Torno nella cartella ../Output/
                         os.chdir(destinationPath)
+                        
+                        print('\n ##### STO PER CHIAMARE LA FUNZIONE downloadMedia() ##### \n')
+                        
                         self.downloadMedia(statesDict, output)
+                        print('\n ##### FINE SCARICAMENTO MEDIA ##### \n')
                         # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
                         self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                        print('\n ##### FINE SPOSTAMENTO MEDIA ##### \n')
                         # I file vengono zippati nella stessa cartella
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
@@ -430,6 +439,8 @@ class Whatsapp(webdriver.Chrome):
             # Retrieving text messages
             textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
             
+            print('\n ##### SONO STATI TROVATI ' + str(len(textMessages)) + ' MESSAGGI ##### \n')
+            
             if(len(messages) == 0 or len(textMessages) == 0):
                 raise NoMessagesException("ERRORE! QUESTA CHAT NON CONTIENE MESSAGGI DI TESTO!")
             else:
@@ -468,6 +479,8 @@ class Whatsapp(webdriver.Chrome):
         except NoMessagesException as nme:
             print(nme)
     
+    
+    
     def sortMessagesByTime(self, messageMetadataList, textMessages, reverse, language):
         
         metadataDict = []
@@ -476,12 +489,7 @@ class Whatsapp(webdriver.Chrome):
         for metadata in messageMetadataList:
             
             timeStr = self.getDateAsString(metadata) + ' ' + self.getHourAsString(metadata)
-            
-            if(language == 'Italian'):
-                timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT)
-            elif(language == 'English'):
-                timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT_ENGLISH)
-                
+            timeObj = datetime.strptime(timeStr, MESSAGE_METADATA_FORMAT)
             sender = self.getSender(metadata)
             metadataDict.append((timeObj, sender))
         
@@ -505,23 +513,25 @@ class Whatsapp(webdriver.Chrome):
     
     def downloadMedia(self, statesDict, output):
         
-        self.downloadGIF(statesDict, output)
-        self.downloadAudios(statesDict, output)
-        self.downloadImages(statesDict, output)
+        # self.downloadGIF(statesDict, output)
         self.downloadVideos(statesDict, output)
+        self.downloadImages(statesDict, output)
+        self.downloadAudios(statesDict, output)
         self.downloadDocuments(statesDict, output)
     
 
 
     def downloadAudios(self, statesDict, output):
         
-        # print('Downloading audios... \n')
+        print('Downloading audios... \n')
         output.config(text=statesDict['aud'])
         
         self.wait(10)
         
         try:
             audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
+            
+            print('\n ##### SONO STATI TROVATI ' + str(len(audios)) + ' AUDIO ##### \n')
         
             if(len(audios) != 0):
                 print(str(len(audios)) + ' audio(s) found... \n')
@@ -550,13 +560,15 @@ class Whatsapp(webdriver.Chrome):
 
 
     def downloadImages(self, statesDict, output):
-        # print('Download images method called \n')
-        output.config(text=statesDict['img'])
         
+        output.config(text=statesDict['img'])
+        print('Downloading images... \n')
         self.wait(10)
         
         try:
             images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
+            
+            print('\n ##### SONO STATE TROVATE ' + str(len(images)) + ' IMMAGINI ##### \n')
             
             if(len(images) != 0):
                 print(str(len(images)) + ' image(s) found... \n')
@@ -587,12 +599,14 @@ class Whatsapp(webdriver.Chrome):
     
     def downloadVideos(self, statesDict, output):
         output.config(text=statesDict['vid'])
-        
+        print('Downloading videos... \n')
         self.wait(10)
         
         try:
             
             videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
+            
+            print('\n ##### SONO STATI TROVATI ' + str(len(videoPlayers)) + ' VIDEO ##### \n')
             
             if(len(videoPlayers) != 0):
                 print(str(len(videoPlayers)) + ' video(s) found... \n')
@@ -623,12 +637,14 @@ class Whatsapp(webdriver.Chrome):
             
     def downloadDocuments(self, statesDict, output):
         output.config(text=statesDict['doc'])
-        
+        print('Downloading documents... \n')
         self.wait(10)
         
         try:
             
             docList = self.find_elements(by=By.XPATH, value=XPATH_DOC_LIST)
+            
+            print('\n ##### SONO STATI TROVATI ' + str(len(docList)) + ' DOCUMENTI ##### \n')
             
             if(len(docList) != 0):
                 print(str(len(docList)) + ' PDF(s) found... \n')
@@ -650,12 +666,14 @@ class Whatsapp(webdriver.Chrome):
             
     def downloadGIF(self, statesDict, output):
         output.config(text=statesDict['doc'])
-        
+        print('Downloading GIFs... \n')
         self.wait(10)
         
         try:
             
             GIFList = self.find_elements(by=By.XPATH, value=XPATH_GIFS)
+            
+            print('\n ##### SONO STATE TROVATE ' + str(len(GIFList)) + ' GIF ##### \n')
             
             if(len(GIFList) != 0):
                 print(str(len(GIFList)) + ' GIF(s) found... \n')
@@ -766,6 +784,8 @@ class Whatsapp(webdriver.Chrome):
     def moveFilesToMainDirectory(self, destinationPath):
         
         os.chdir(DOWNLOADS_PATH)
+        
+        print('\n ##### SONO ENTRATO NELLA CARTELLA ' + DOWNLOADS_PATH + ' E SPOSTO I FILE IN ' + destinationPath + ' ##### \n')
         
         filesInDownloadsFolder = os.listdir()
         filteredFiles = [i for i in filesInDownloadsFolder if any(i for j in ACCEPTED_EXTENSIONS if str(j) in i)]

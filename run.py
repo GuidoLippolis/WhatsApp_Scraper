@@ -77,7 +77,6 @@ def uploadContactsFile():
     
     
 def openBrowser():
-    print('Lunghezza nome file = ' + str(len(pathToCSV)))
     Whatsapp().findChatToScrap(tree, pathToCSV, destinationPath, save_media.get(),
                                archiviate.get(), statesDict, output, language)
 

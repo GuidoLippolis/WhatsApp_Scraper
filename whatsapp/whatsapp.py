@@ -4,6 +4,10 @@ Created on Sun Sep  4 12:10:34 2022
 @author: guido
 """
 
+import logging
+logging.basicConfig(level=logging.INFO, filename='log.log', filemode='a',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 import time
 from datetime import datetime
 import os
@@ -120,12 +124,12 @@ class Whatsapp(webdriver.Chrome):
             if(len(archivedChatsButton) == 0):
                 raise ArchivedChatsButtonNotFoundException("ERRORE! IL BOTTONE DELLE CHAT ARCHIVIATE NON E' PRESENTE! \n")
             else:
-                self.wait(5)
+                time.sleep(5)
                 self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
                 
                 archivedChatsButton[0].click()
                 
-                self.wait(5)
+                time.sleep(5)
         
                 unarchivedContacts = []
                 archivedChats2 = []
@@ -139,15 +143,15 @@ class Whatsapp(webdriver.Chrome):
                 for chat in archivedChats2:
                     if(chat.is_displayed()):
                         unarchivedContacts.append(chat.get_attribute('title'))
-                        self.wait(2)
+                        time.sleep(2)
                         ActionChains(self).move_to_element(chat).perform()
-                        self.wait(1)
+                        time.sleep(1)
                         dropDownArchivedChatButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
                         dropDownArchivedChatButton.click()
-                        self.wait(1)
+                        time.sleep(1)
                         unarchiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
                         unarchiveButton.click()
-                        self.wait(5)
+                        time.sleep(5)
                 
                 closeArchivedChatsSectionButton = self.find_element(by=By.XPATH, value=CLOSE_ARCHIVED_CHATS_SECTION)
                 closeArchivedChatsSectionButton.click()
@@ -250,6 +254,7 @@ class Whatsapp(webdriver.Chrome):
         os.chdir(destinationPath)
         # Creo la cartella SCRAPED_timestamp
         os.mkdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
+        logging.info(f'Ho creato la cartella {SCRAPING_DIRECTORY_NAME}' + '_' + timestamp)
         # Ci entro (../Output/SCRAPED_timestamp/)
         os.chdir(SCRAPING_DIRECTORY_NAME + "_" + timestamp)
         
@@ -257,7 +262,7 @@ class Whatsapp(webdriver.Chrome):
         self.maximize_window()
         self.waitForElementToAppear(500, XPATH_CHAT_FILTER_BUTTON)
         output.config(text=statesDict['caricamento'])
-        self.wait(40)
+        time.sleep(40)
         
         if(unarchiveChatsCheckbox == 1):
             unarchivedContacts = self.unarchiveChats()
@@ -273,36 +278,34 @@ class Whatsapp(webdriver.Chrome):
         
         if(len(pathToCSV) != 0):
             
-            print('Hai caricato il file \n')
-        
             contactNamesFromCSV = self.readContactsFromFile(pathToCSV)
             
             for contactName in contactNamesFromCSV:
+
+                logging.info('---------------------------------------------------------------------')
+                
+                logging.info(f'Sto esaminando il contatto {contactName}')                
 
                 chats = self.getContacts()
                 
                 contactFound = self.searchContactToClick(chats, contactName)
                 if(contactFound == True):
                     
-                    print('\n ##### CONTATTO TROVATO ##### \n')
+                    logging.info(f'Contatto {contactName} trovato')
                     
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
-                    print('\n ##### STO PER CHIAMARE LA FUNZIONE getConversation() ##### \n')
                     self.getConversation(path, contactName, tree, language)
                     # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
                     
                     if(downloadMediaCheckbox == 1):
                         # Torno nella cartella ../Output/
                         os.chdir(destinationPath)
-                        
-                        print('\n ##### STO PER CHIAMARE LA FUNZIONE downloadMedia() ##### \n')
-                        
                         self.downloadMedia(statesDict, output)
-                        print('\n ##### FINE SCARICAMENTO MEDIA ##### \n')
+                        logging.info('... FINE SCARICAMENTO MEDIA')
                         # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
                         self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
-                        print('\n ##### FINE SPOSTAMENTO MEDIA ##### \n')
+                        logging.info('... Fine spostamento media')
                         # I file vengono zippati nella stessa cartella
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
@@ -345,6 +348,8 @@ class Whatsapp(webdriver.Chrome):
                                         self.execute_script(scriptGoBack)
                                     
                                     break
+                                
+                                logging.info('---------------------------------------------------------------------')
                                 
                                 break
                             except:
@@ -403,15 +408,15 @@ class Whatsapp(webdriver.Chrome):
                     print('Sto cercando di prendere il contatto ' + name)
                     print('\n')
                     if(name in list(setContactsToArchive) and name not in archivedContacts):
-                        self.wait(2)
+                        time.sleep(2)
                         ActionChains(self).move_to_element(chat).perform()
-                        self.wait(1)
+                        time.sleep(1)
                         dropDownArchiveButton = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_ARCHIVED_CHATS)
                         dropDownArchiveButton.click()
-                        self.wait(1)
+                        time.sleep(1)
                         archiveButton = self.find_element(by=By.XPATH, value=XPATH_UNARCHIVE_BUTTON)
                         archiveButton.click()
-                        self.wait(5)
+                        time.sleep(5)
                         archivedContacts.append(name)
                         unarchivedContacts.pop()
                         self.execute_script(scriptGoBack)
@@ -432,6 +437,8 @@ class Whatsapp(webdriver.Chrome):
         
         try:
         
+            logging.info(f'Sto cercando di recuperare la conversazione con {contactName}...')
+            
             messageMetadataList = []
             # Retrieving all divs containing text messages
             messages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES_CONTAINERS)
@@ -439,10 +446,12 @@ class Whatsapp(webdriver.Chrome):
             # Retrieving text messages
             textMessages = self.find_elements(by=By.XPATH, value=XPATH_TEXT_MESSAGES)
             
-            print('\n ##### SONO STATI TROVATI ' + str(len(textMessages)) + ' MESSAGGI ##### \n')
+            numMessages = len(textMessages)
+            
+            logging.info(f'Sono stati trovati {numMessages} messaggi di testo')
             
             if(len(messages) == 0 or len(textMessages) == 0):
-                raise NoMessagesException("ERRORE! QUESTA CHAT NON CONTIENE MESSAGGI DI TESTO!")
+                raise NoMessagesException("QUESTA CHAT NON CONTIENE MESSAGGI DI TESTO!")
             else:
             
                 for message in messages:
@@ -513,6 +522,8 @@ class Whatsapp(webdriver.Chrome):
     
     def downloadMedia(self, statesDict, output):
         
+        logging.info('STO SCARICANDO I MEDIA...')
+        
         # self.downloadGIF(statesDict, output)
         self.downloadVideos(statesDict, output)
         self.downloadImages(statesDict, output)
@@ -523,36 +534,42 @@ class Whatsapp(webdriver.Chrome):
 
     def downloadAudios(self, statesDict, output):
         
-        print('Downloading audios... \n')
+        logging.info('Sto cercando gli audio...')
+        
         output.config(text=statesDict['aud'])
         
-        self.wait(10)
+        time.sleep(10)
         
         try:
             audios = self.find_elements(by=By.XPATH, value=XPATH_AUDIOS)
             
-            print('\n ##### SONO STATI TROVATI ' + str(len(audios)) + ' AUDIO ##### \n')
+            numAudios = len(audios)
+            
+            logging.info(f'Sono stati trovati {numAudios} audio')
         
             if(len(audios) != 0):
-                print(str(len(audios)) + ' audio(s) found... \n')
+
                 for audio in audios:
+                    
+                    time.sleep(3)
                     
                     ActionChains(self).move_to_element(audio).perform()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
                     
                     dropDownMenu.click()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
                     
                     downloadButton.click()
                     
             else:
-                raise AudioNotFoundException("ERRORE! AUDIO NON PRESENTI! \n")
+                logging.error('AUDIO NON PRESENTI')
+                raise AudioNotFoundException("AUDIO NON PRESENTI! \n")
                 
         except AudioNotFoundException as anf:
             print(anf)
@@ -560,37 +577,42 @@ class Whatsapp(webdriver.Chrome):
 
 
     def downloadImages(self, statesDict, output):
+
+        logging.info('Sto cercando le immagini...')
         
         output.config(text=statesDict['img'])
-        print('Downloading images... \n')
-        self.wait(10)
+
+        time.sleep(10)
         
         try:
             images = self.find_elements(by=By.XPATH, value=XPATH_IMAGES)
             
-            print('\n ##### SONO STATE TROVATE ' + str(len(images)) + ' IMMAGINI ##### \n')
+            numImages = len(images)
+            
+            logging.info(f'Sono state trovate {numImages} immagini')
             
             if(len(images) != 0):
-                print(str(len(images)) + ' image(s) found... \n')
+
                 for image in images:
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     image.click()
     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
                     
                     downloadButton.click()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
                     
                     closeButton.click()
             else:
-                raise ImageNotFoundException("ERRORE! IMMAGINI NON PRESENTI! \n")
+                logging.error('IMMAGINI NON PRESENTI')
+                raise ImageNotFoundException("IMMAGINI NON PRESENTI! \n")
             
         except ImageNotFoundException as inf:
             print(inf)
@@ -598,37 +620,43 @@ class Whatsapp(webdriver.Chrome):
     
     
     def downloadVideos(self, statesDict, output):
+        
+        logging.info('Sto cercando i video...')
+        
         output.config(text=statesDict['vid'])
-        print('Downloading videos... \n')
-        self.wait(10)
+        
+        time.sleep(10)
         
         try:
             
             videoPlayers = self.find_elements(by=By.XPATH, value=VIDEO_PLAY_BUTTON_XPATH)
             
-            print('\n ##### SONO STATI TROVATI ' + str(len(videoPlayers)) + ' VIDEO ##### \n')
+            numVideos = len(videoPlayers)
+            
+            logging.info(f'Sono stati trovati {numVideos} video')
             
             if(len(videoPlayers) != 0):
-                print(str(len(videoPlayers)) + ' video(s) found... \n')
+
                 for playButton in videoPlayers:
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     playButton.click()
                     
-                    self.wait(60)
+                    time.sleep(60)
                     
                     downloadButton = self.find_element(by=By.XPATH, value=DOWNLOAD_BUTTON_XPATH)
                     
                     downloadButton.click()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
                     
                     closeButton.click()
             else:
-                raise VideoNotFoundException("ERRORE! VIDEO NON PRESENTI! \n")
+                logging.error('VIDEO NON PRESENTI')
+                raise VideoNotFoundException("VIDEO NON PRESENTI! \n")
                     
         except VideoNotFoundException as vnf:
             print(vnf)
@@ -636,28 +664,34 @@ class Whatsapp(webdriver.Chrome):
            
             
     def downloadDocuments(self, statesDict, output):
+
+        logging.info('Sto cercando i documenti...')
+
         output.config(text=statesDict['doc'])
-        print('Downloading documents... \n')
-        self.wait(10)
+
+        time.sleep(10)
         
         try:
             
             docList = self.find_elements(by=By.XPATH, value=XPATH_DOC_LIST)
             
-            print('\n ##### SONO STATI TROVATI ' + str(len(docList)) + ' DOCUMENTI ##### \n')
+            numDocs = len(docList)
+            
+            logging.info(f'Sono stati trovati {numDocs} documenti')
             
             if(len(docList) != 0):
-                print(str(len(docList)) + ' PDF(s) found... \n')
+
                 for doc in docList:
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     doc.click()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
             else:
-                raise DocumentNotFoundException("ERRORE! DOCUMENTI NON PRESENTI! \n")
+                logging.error('DOCUMENTI NON PRESENTI')
+                raise DocumentNotFoundException("DOCUMENTI NON PRESENTI! \n")
         
         except DocumentNotFoundException as dnf:
             print(dnf)
@@ -665,42 +699,48 @@ class Whatsapp(webdriver.Chrome):
             
             
     def downloadGIF(self, statesDict, output):
+
+        logging.info('Sto cercando le GIF...')
+
         output.config(text=statesDict['doc'])
-        print('Downloading GIFs... \n')
-        self.wait(10)
+
+        time.sleep(10)
         
         try:
             
             GIFList = self.find_elements(by=By.XPATH, value=XPATH_GIFS)
             
-            print('\n ##### SONO STATE TROVATE ' + str(len(GIFList)) + ' GIF ##### \n')
+            numGifs = len(GIFList)
+            
+            logging.info(f'Sono state trovate {numGifs} GIF')
             
             if(len(GIFList) != 0):
-                print(str(len(GIFList)) + ' GIF(s) found... \n')
+
                 for gif in GIFList:
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     ActionChains(self).move_to_element(gif).perform()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     dropDownMenu = self.find_element(by=By.XPATH, value=XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS)
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     dropDownMenu.click()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
                     downloadButton = self.find_element(by=By.XPATH, value=XPATH_DOWNLOAD_AUDIOS)
                     
                     downloadButton.click()
                     
-                    self.wait(3)
+                    time.sleep(3)
                     
             else:
-                raise DocumentNotFoundException("ERRORE! GIF NON PRESENTI! \n")
+                logging.error('GIF NON PRESENTI')
+                raise DocumentNotFoundException("GIF NON PRESENTI! \n")
         
         except DocumentNotFoundException as dnf:
             print(dnf)
@@ -713,15 +753,26 @@ class Whatsapp(webdriver.Chrome):
         tree.insert('', tk.END, values=tupla)
         
         if(not self.isFileNameValid(contactName)):
+            
             contactName = self.renameFileOrFolderName(contactName)
+            
             if not os.path.exists(contactName):
+                
                 os.mkdir(contactName)
+                logging.info(f'Ho creato la cartella {contactName}')
+                
             os.chdir(contactName)
-            print('Sono entrato nella cartella del contatto ' + contactName + '\n')
+            logging.info(f'Sono entrato nella cartella del contatto {contactName}')
+            
         else:
+            
             if not os.path.exists(contactName):
+                
                 os.mkdir(contactName)
+                logging.info(f'Ho creato la cartella {contactName}')
+                
             os.chdir(contactName)
+            logging.info(f'Sono entrato nella cartella del contatto {contactName}')
         
         if not os.path.exists(contactName + ".csv"):
             newDataFrame = pd.DataFrame([data], columns=HEADER)
@@ -732,6 +783,8 @@ class Whatsapp(webdriver.Chrome):
         
         # Una volta aggiornato il file .csv, torno indietro di un livello
         os.chdir('..')
+        currentDirectory = os.getcwd()
+        logging.info(f'Sono tornato nella cartella {currentDirectory}')
         
         
      
@@ -771,21 +824,15 @@ class Whatsapp(webdriver.Chrome):
             if e not in firstList:
                 updatedList.append(e)
         return updatedList
-    
-    
-    
-    def wait(self, seconds):
-        for i in range(1, seconds+1):
-            time.sleep(1)
-            print(str(i) + '... \n')
-            
+
             
             
     def moveFilesToMainDirectory(self, destinationPath):
         
         os.chdir(DOWNLOADS_PATH)
         
-        print('\n ##### SONO ENTRATO NELLA CARTELLA ' + DOWNLOADS_PATH + ' E SPOSTO I FILE IN ' + destinationPath + ' ##### \n')
+        # print('\n ##### SONO ENTRATO NELLA CARTELLA ' + DOWNLOADS_PATH + ' E SPOSTO I FILE IN ' + destinationPath + ' ##### \n')
+        logging.info(f'Sono entrato nella cartella {DOWNLOADS_PATH} e sto spostando i file in {destinationPath}')
         
         filesInDownloadsFolder = os.listdir()
         filteredFiles = [i for i in filesInDownloadsFolder if any(i for j in ACCEPTED_EXTENSIONS if str(j) in i)]
@@ -797,6 +844,7 @@ class Whatsapp(webdriver.Chrome):
                 shutil.move(newFileName, destinationPath)
             
         os.chdir(DIRECTORY_CALLBACK)
+        logging.info(f'Sono tornato nella cartella {DIRECTORY_CALLBACK}')
         
     
     
@@ -811,6 +859,7 @@ class Whatsapp(webdriver.Chrome):
     
     def zipFiles(self, path, contactName):
         os.chdir(path)
+        logging.info(f'Sono entrato nella cartella del contatto {contactName} per zippare i file...')
         # Zipping multimedia files
         with zipfile.ZipFile(contactName + "_" + MULTIMEDIA_ZIP_NAME + ".zip", "w", compression=zipfile.ZIP_DEFLATED) as f:
             for file in os.listdir():
@@ -822,7 +871,10 @@ class Whatsapp(webdriver.Chrome):
                 if(file == contactName + ".csv" and not file.endswith(".zip")):
                     f.write(file)
                     
-        os.chdir('..')       
+        os.chdir('..')  
+        currentDirectory = os.getcwd()
+        logging.info(f'Sono tornato nella cartella {currentDirectory}')
+        
                     
                     
     def zipHasher(self, path):

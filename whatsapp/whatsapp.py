@@ -309,7 +309,7 @@ class Whatsapp(webdriver.Chrome):
                     
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
-                    self.getConversation(path, contactName, tree, language)
+                    self.getConversation(path, contactName, tree)
 
                     
                     if(downloadMediaCheckbox == 1):
@@ -501,7 +501,7 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def sortMessagesByTime(self, messageMetadataList, textMessages, reverse, language):
+    def sortMessagesByTime(self, messageMetadataList, textMessages, reverse):
         
         metadataDict = []
         finalDict = []

@@ -19,9 +19,9 @@ from whatsapp.constants import SUPPORTED_LANGUAGES
 
 import threading
 
-configurationFile = 'language.ini'
-config = ConfigParser()
-config.read(configurationFile)
+language_file = 'language.ini'
+language_parser = ConfigParser()
+language_parser.read(language_file)
 
 def changeLanguage(index, value, op):
     
@@ -31,33 +31,33 @@ def changeLanguage(index, value, op):
     global output
     global language
     
-    config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
+    language_parser.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     
-    with open(configurationFile, 'w') as file:
-        config.write(file)
+    with open(language_file, 'w') as file:
+        language_parser.write(file)
         
-    states = json.loads(config.get(config[LANGUAGE][CURRENT_LANGUAGE],"stati"))
+    states = json.loads(language_parser.get(language_parser[LANGUAGE][CURRENT_LANGUAGE],"stati"))
     statesDict = dict(states)
     
-    tree.heading(0, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
-    tree.heading(1, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
-    tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
-    tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
+    tree.heading(0, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
+    tree.heading(1, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
+    tree.heading(2, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
+    tree.heading(3, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
     
     output = output_label_2
     
-    language = config[LANGUAGE][CURRENT_LANGUAGE]
+    language = language_parser[LANGUAGE][CURRENT_LANGUAGE]
     
-    credit_label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
-    label.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
-    choose_1.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['lista_contatti'])
-    choose_2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['avvio'])
-    c2.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['chat_archiviate'])
-    choose_dest.config(text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['destinazione'])
-    config.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
+    credit_label.config(text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['autore'])
+    label.config(text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['opzioni'])
+    choose_1.config(text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['lista_contatti'])
+    choose_2.config(text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['avvio'])
+    c2.config(text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['chat_archiviate'])
+    choose_dest.config(text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['destinazione'])
+    language_parser.set(LANGUAGE, CURRENT_LANGUAGE, comboLang.get())
     
-    with open(configurationFile, 'w') as file:
-        config.write(file)
+    with open(language_file, 'w') as file:
+        language_parser.write(file)
     return
 
 
@@ -91,11 +91,11 @@ window.iconbitmap('whatsapp.ico')
 
 
 
-tree = ttk.Treeview(window, show="headings", columns=(config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio']), height=14)
-tree.heading(0, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
-tree.heading(1, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
-tree.heading(2, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
-tree.heading(3, text=config[ config[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
+tree = ttk.Treeview(window, show="headings", columns=(language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['data'], language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio']), height=14)
+tree.heading(0, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['data'], anchor=tk.W)
+tree.heading(1, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['ora'], anchor=tk.W)
+tree.heading(2, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['mittente'], anchor=tk.W)
+tree.heading(3, text=language_parser[ language_parser[LANGUAGE][CURRENT_LANGUAGE] ]['messaggio'], anchor=tk.W)
 tree.column('#1', minwidth=110, stretch=False, width=110)
 tree.column('#2', minwidth=90, stretch=False, width=90)
 tree.column('#3', minwidth=140, stretch=False, width=140)
@@ -164,6 +164,6 @@ v = tk.StringVar()
 v.trace('w', changeLanguage)
 comboLang = ttk.Combobox(window, textvar=v, state="readonly", values=SUPPORTED_LANGUAGES)
 comboLang.grid(row=0, column=0, sticky="W", padx=10, pady=10)
-comboLang.set(config[LANGUAGE][CURRENT_LANGUAGE])
+comboLang.set(language_parser[LANGUAGE][CURRENT_LANGUAGE])
 
 window.mainloop()

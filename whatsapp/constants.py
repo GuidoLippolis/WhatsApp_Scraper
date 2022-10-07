@@ -45,7 +45,7 @@ SCRAPING_DIRECTORY_NAME = "Scraped"
 TIMESTAMP_FORMAT = "%H:%M:%S%f"
 
 # Folder to go back for every message
-DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
+# DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
 
 # Number of pixels to scroll
 PIXELS_TO_SCROLL = 250
@@ -66,7 +66,7 @@ MESSAGE_METADATA_FORMAT = '%d/%m/%Y %H:%M'
 MESSAGE_METADATA_FORMAT_ENGLISH = '%m/%d/%Y %H:%M'
 
 # XPath for image tags
-XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb')]"
+XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb') and contains(@role,'button')]"
 
 # XPath for audio play buttons
 XPATH_AUDIOS = "//span[contains(@data-testid, 'audio-play')]"
@@ -81,7 +81,7 @@ XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//div[contains(@data-testid, 'icon-down-
 XPATH_DOWNLOAD_AUDIOS = "//span//li[contains(@data-testid, 'mi-msg-download')]"
 
 # Path to Downloads folder in Windows
-DOWNLOADS_PATH = "C://Users//guido//Downloads"
+# DOWNLOADS_PATH = "C://Users//guido//Downloads"
 
 # XPath archived chats
 XPATH_ARCHIVED_CHATS = '//div[contains(@class,"_3uIPm WYyr1") and not(contains(@aria-label,"Lista"))]//span[contains(@dir,"auto")]'
@@ -120,8 +120,17 @@ REGULAR_EXPRESSION = "[^a-zA-Z]*"
 # Current language
 CURRENT_LANGUAGE = "lingua_corrente"
 
-# Language section in config file
+# Language section in language file
 LANGUAGE = 'Lingua'
 
 # Supported languages
 SUPPORTED_LANGUAGES = ["English", "Italiano", "Francais", "Deutsch"]
+
+# Paths section in paths file
+PATHS = 'Paths'
+
+# Directory callback attribute for Paths section in paths file
+DIRECTORY_CALLBACK = 'directory_callback'
+
+# Downloads path attribute for Paths section in paths file
+DOWNLOADS_PATH = 'downloads_path'

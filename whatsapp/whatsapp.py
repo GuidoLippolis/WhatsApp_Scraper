@@ -5,8 +5,10 @@ Created on Sun Sep  4 12:10:34 2022
 """
 
 import logging
-logging.basicConfig(level=logging.INFO, filename='log.log', filemode='a',
+logging.basicConfig(level=logging.INFO, filename='log.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+from configparser import ConfigParser
 
 import time
 from datetime import datetime
@@ -40,6 +42,7 @@ from whatsapp.constants import XPATH_TEXT_MESSAGES
 from whatsapp.constants import SCRAPING_DIRECTORY_NAME
 from whatsapp.constants import TIMESTAMP_FORMAT
 from whatsapp.constants import DIRECTORY_CALLBACK
+from whatsapp.constants import PATHS
 from whatsapp.constants import PIXELS_TO_SCROLL
 from whatsapp.constants import VIDEO_PLAY_BUTTON_XPATH
 from whatsapp.constants import DOWNLOAD_BUTTON_XPATH
@@ -64,7 +67,6 @@ from whatsapp.constants import CLOSE_ARCHIVED_CHATS_SECTION
 from whatsapp.constants import CHARACTERS_TO_AVOID
 from whatsapp.constants import REGULAR_EXPRESSION
 
-
 from whatsapp.exceptions.ImageNotFoundException import ImageNotFoundException
 from whatsapp.exceptions.VideoNotFoundException import VideoNotFoundException
 from whatsapp.exceptions.AudioNotFoundException import AudioNotFoundException
@@ -77,8 +79,16 @@ class Whatsapp(webdriver.Chrome):
     def __init__(self, driver_path = PATH_DRIVER_CHROME):
         self.driver_path = driver_path
         super(Whatsapp, self).__init__()
-        
-        
+      
+    
+    
+    def getParser(self):
+        paths_file = 'paths.ini'
+        paths_parser = ConfigParser()
+        paths_parser.read(paths_file)
+        return paths_parser
+    
+    
         
     def getContacts(self):
         self.implicitly_wait(150)
@@ -248,6 +258,8 @@ class Whatsapp(webdriver.Chrome):
     def findChatToScrap(self, tree, pathToCSV, destinationPath, 
                         downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output, language):
 
+        paths_parser = self.getParser()
+        print(paths_parser[PATHS][DIRECTORY_CALLBACK])
         
         timestamp = self.getTimeStamp();
         # Entro nella cartella di destinazione (es. ../Output/)
@@ -283,7 +295,7 @@ class Whatsapp(webdriver.Chrome):
             for contactName in contactNamesFromCSV:
 
                 logging.info('---------------------------------------------------------------------')
-                
+                time.sleep(10)
                 logging.info(f'Sto esaminando il contatto {contactName}')                
 
                 chats = self.getContacts()
@@ -296,7 +308,7 @@ class Whatsapp(webdriver.Chrome):
                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                     # Al metodo getConversation() passo il percorso /SCRAPED_timestamp/
                     self.getConversation(path, contactName, tree, language)
-                    # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
+
                     
                     if(downloadMediaCheckbox == 1):
                         # Torno nella cartella ../Output/
@@ -304,12 +316,12 @@ class Whatsapp(webdriver.Chrome):
                         self.downloadMedia(statesDict, output)
                         logging.info('... FINE SCARICAMENTO MEDIA')
                         # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
-                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName, paths_parser)
                         logging.info('... Fine spostamento media')
                         # I file vengono zippati nella stessa cartella
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
-                        # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
+
                 else:
                     
                     while True:
@@ -524,9 +536,9 @@ class Whatsapp(webdriver.Chrome):
         
         logging.info('STO SCARICANDO I MEDIA...')
         
-        # self.downloadGIF(statesDict, output)
-        self.downloadVideos(statesDict, output)
         self.downloadImages(statesDict, output)
+        self.downloadVideos(statesDict, output)
+        self.downloadGIF(statesDict, output)
         self.downloadAudios(statesDict, output)
         self.downloadDocuments(statesDict, output)
     
@@ -605,6 +617,8 @@ class Whatsapp(webdriver.Chrome):
                     
                     downloadButton.click()
                     
+                    logging.debug('Ho cliccato sul tasto download')
+                    
                     time.sleep(3)
                     
                     closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
@@ -654,6 +668,7 @@ class Whatsapp(webdriver.Chrome):
                     closeButton = self.find_element(by=By.XPATH, value=CLOSE_BUTTON_MEDIA_XPATH)
                     
                     closeButton.click()
+                    
             else:
                 logging.error('VIDEO NON PRESENTI')
                 raise VideoNotFoundException("VIDEO NON PRESENTI! \n")
@@ -759,20 +774,16 @@ class Whatsapp(webdriver.Chrome):
             if not os.path.exists(contactName):
                 
                 os.mkdir(contactName)
-                logging.info(f'Ho creato la cartella {contactName}')
                 
             os.chdir(contactName)
-            logging.info(f'Sono entrato nella cartella del contatto {contactName}')
             
         else:
             
             if not os.path.exists(contactName):
                 
                 os.mkdir(contactName)
-                logging.info(f'Ho creato la cartella {contactName}')
                 
             os.chdir(contactName)
-            logging.info(f'Sono entrato nella cartella del contatto {contactName}')
         
         if not os.path.exists(contactName + ".csv"):
             newDataFrame = pd.DataFrame([data], columns=HEADER)
@@ -783,8 +794,6 @@ class Whatsapp(webdriver.Chrome):
         
         # Una volta aggiornato il file .csv, torno indietro di un livello
         os.chdir('..')
-        currentDirectory = os.getcwd()
-        logging.info(f'Sono tornato nella cartella {currentDirectory}')
         
         
      
@@ -827,12 +836,15 @@ class Whatsapp(webdriver.Chrome):
 
             
             
-    def moveFilesToMainDirectory(self, destinationPath):
+    def moveFilesToMainDirectory(self, destinationPath, paths_parser):
         
-        os.chdir(DOWNLOADS_PATH)
+        os.chdir(paths_parser[PATHS][DOWNLOADS_PATH])
+        
+        downloads_path = paths_parser[PATHS][DOWNLOADS_PATH]
+        directory_callback = paths_parser[PATHS][DIRECTORY_CALLBACK]
         
         # print('\n ##### SONO ENTRATO NELLA CARTELLA ' + DOWNLOADS_PATH + ' E SPOSTO I FILE IN ' + destinationPath + ' ##### \n')
-        logging.info(f'Sono entrato nella cartella {DOWNLOADS_PATH} e sto spostando i file in {destinationPath}')
+        logging.info(f'Sono entrato nella cartella {downloads_path} e sto spostando i file in {destinationPath}')
         
         filesInDownloadsFolder = os.listdir()
         filteredFiles = [i for i in filesInDownloadsFolder if any(i for j in ACCEPTED_EXTENSIONS if str(j) in i)]
@@ -843,8 +855,8 @@ class Whatsapp(webdriver.Chrome):
                 os.rename(fileName, newFileName)
                 shutil.move(newFileName, destinationPath)
             
-        os.chdir(DIRECTORY_CALLBACK)
-        logging.info(f'Sono tornato nella cartella {DIRECTORY_CALLBACK}')
+        os.chdir(paths_parser[PATHS][DIRECTORY_CALLBACK])
+        logging.info(f'Sono tornato nella cartella {directory_callback}')
         
     
     
@@ -872,8 +884,6 @@ class Whatsapp(webdriver.Chrome):
                     f.write(file)
                     
         os.chdir('..')  
-        currentDirectory = os.getcwd()
-        logging.info(f'Sono tornato nella cartella {currentDirectory}')
         
                     
                     
@@ -894,11 +904,17 @@ class Whatsapp(webdriver.Chrome):
                     for chunk in iter(lambda: f.read(4096), b""):
                         sha512.update(chunk)
                         md5.update(chunk)
+                        
                     print('{}: {}'.format(sha512.name, sha512.hexdigest()))
                     print('{}: {}'.format(md5.name, md5.hexdigest()))
+                    
+                    logging.info(f'Message digest del file {fileName} generato con algoritmo ' + '{}'.format(sha512.name) + ' {}'.format(sha512.hexdigest()))
+                    logging.info(f'Message digest del file {fileName} generato con algoritmo ' + '{}'.format(md5.name) + ' {}'.format(md5.hexdigest()))
+                    
                     data.append(fileName)
                     data.append(md5.hexdigest())
                     data.append(sha512.hexdigest())
+                    
                     if not os.path.exists(HASHING_CSV_FILE_NAME):
                         newDataFrame = pd.DataFrame([data], columns=HEADER_HASHING)
                         newDataFrame.to_csv(HASHING_CSV_FILE_NAME, mode='a', index=False, header=True, sep=";")

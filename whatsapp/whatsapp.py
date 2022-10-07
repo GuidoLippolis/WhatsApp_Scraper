@@ -204,7 +204,8 @@ class Whatsapp(webdriver.Chrome):
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
                         # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
-                
+                        logging.info("Rimuovo i file già inseriti nell'archivio zip")
+                        self.cleanOutputDirectory(destinationPath + "\\" + path + "\\" + contactName)
         
         while True:
             updatedList = []
@@ -239,6 +240,8 @@ class Whatsapp(webdriver.Chrome):
                                     self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                                     self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
                                     # os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
+                                    logging.info("Rimuovo i file già inseriti nell'archivio zip")
+                                    self.cleanOutputDirectory(destinationPath + "\\" + path + "\\" + contactName)
                     
                             break
                     break
@@ -320,7 +323,9 @@ class Whatsapp(webdriver.Chrome):
                         # I file vengono zippati nella stessa cartella
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
-
+                        # Clean output directory
+                        logging.info("Rimuovo i file già inseriti nell'archivio zip")
+                        self.cleanOutputDirectory(destinationPath + "\\" + path + "\\" + contactName)
                 else:
                     
                     while True:
@@ -343,7 +348,7 @@ class Whatsapp(webdriver.Chrome):
                                     endOfSearch = True
                                     path = SCRAPING_DIRECTORY_NAME + "_" + timestamp
                                     self.getConversation(path, contactName, tree)
-                                    os.chdir(r'C:\GitHub_Repositories\WhatsApp_Scraper')
+                                    os.chdir(paths_parser[PATHS][DIRECTORY_CALLBACK])
                                     self.execute_script(scriptGoBack)
                                 
                                     if(downloadMediaCheckbox == 1):
@@ -354,7 +359,10 @@ class Whatsapp(webdriver.Chrome):
                                         self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName, paths_parser)
                                         # I file vengono zippati nella stessa cartella
                                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
-                                        self.zipHasher(path + "\\" + contactName)
+                                        self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
+                                        # Clean output directory
+                                        logging.info("Rimuovo i file già inseriti nell'archivio zip")
+                                        self.cleanOutputDirectory(destinationPath + "\\" + path + "\\" + contactName)
                                         self.execute_script(scriptGoBack)
                                     
                                     break
@@ -909,4 +917,16 @@ class Whatsapp(webdriver.Chrome):
                         newDataFrame = pd.DataFrame([data], columns=HEADER_HASHING)
                         newDataFrame.to_csv(HASHING_CSV_FILE_NAME, mode='a', index=False, header=False, sep=";")
         
+        os.chdir('..')
+        
+        
+        
+    def cleanOutputDirectory(self, path):
+        
+        os.chdir(path)
+        
+        for fileName in os.listdir():
+            if not fileName.endswith('.zip') and fileName != HASHING_CSV_FILE_NAME:
+                os.remove(fileName)
+                
         os.chdir('..')

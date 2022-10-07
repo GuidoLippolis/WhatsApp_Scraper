@@ -87,7 +87,8 @@ XPATH_UNARCHIVE_BUTTON = '//li[contains(@data-testid, "mi-archive")]'
 XPATH_DOC_LIST = '//button[contains(@data-testid,"document-thumb")]'
 
 # Accepted extensions
-ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf", ".docx", ".txt", ".doc", ".xlsx"]
+ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf"]
+# ACCEPTED_EXTENSIONS = [".ogg", ".mp4", ".png", ".jpeg", ".mp3", ".pdf", ".docx", ".txt", ".doc", ".xlsx"]
 
 # Chat filter button
 XPATH_CHAT_FILTER_BUTTON = '//span[contains(@data-testid,"filter")]'

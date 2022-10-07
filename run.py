@@ -23,6 +23,8 @@ language_file = 'language.ini'
 language_parser = ConfigParser()
 language_parser.read(language_file)
 
+pathToCSV = ''
+
 def changeLanguage(index, value, op):
     
     global states
@@ -74,6 +76,7 @@ def uploadContactsFile():
     filename = filedialog.askopenfilename(filetypes=(("CSV files", "*.csv*"), ("all files", "*.*")))
     choose_label.configure(text=filename)
     pathToCSV = filename
+
     
     
 def openBrowser():

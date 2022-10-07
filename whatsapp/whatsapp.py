@@ -443,7 +443,7 @@ class Whatsapp(webdriver.Chrome):
     
     
     
-    def getConversation(self, pathToCSV, contactName, tree, language):
+    def getConversation(self, pathToCSV, contactName, tree):
         
         try:
         
@@ -476,7 +476,7 @@ class Whatsapp(webdriver.Chrome):
                     messageMetadataList.append(metadata)
         
                 # Messages are sorted in descending order (if the last attribute is set to "True")
-                sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True, language)
+                sortedMetadataDict = self.sortMessagesByTime(messageMetadataList, textMessages, True)
                  
                 for row in sortedMetadataDict:
                         # Filling a list where data to be written in the .csv file are passed as input

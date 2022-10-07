@@ -44,9 +44,6 @@ SCRAPING_DIRECTORY_NAME = "Scraped"
 # Timestamp format for directory names
 TIMESTAMP_FORMAT = "%H:%M:%S%f"
 
-# Folder to go back for every message
-# DIRECTORY_CALLBACK = "C:\GitHub_Repositories\WhatsApp_Scraper"
-
 # Number of pixels to scroll
 PIXELS_TO_SCROLL = 250
 
@@ -62,9 +59,6 @@ CLOSE_BUTTON_MEDIA_XPATH = "//span[contains(@data-testid, 'x-viewer')]"
 # Format for message metadata
 MESSAGE_METADATA_FORMAT = '%d/%m/%Y %H:%M'
 
-# English date format
-MESSAGE_METADATA_FORMAT_ENGLISH = '%m/%d/%Y %H:%M'
-
 # XPath for image tags
 XPATH_IMAGES = "//div[contains(@data-testid,'image-thumb') and contains(@role,'button')]"
 
@@ -79,9 +73,6 @@ XPATH_DROP_DOWN_MENU_DOWNLOAD_AUDIOS = "//div[contains(@data-testid, 'icon-down-
 
 # XPath for downloading audios
 XPATH_DOWNLOAD_AUDIOS = "//span//li[contains(@data-testid, 'mi-msg-download')]"
-
-# Path to Downloads folder in Windows
-# DOWNLOADS_PATH = "C://Users//guido//Downloads"
 
 # XPath archived chats
 XPATH_ARCHIVED_CHATS = '//div[contains(@class,"_3uIPm WYyr1") and not(contains(@aria-label,"Lista"))]//span[contains(@dir,"auto")]'

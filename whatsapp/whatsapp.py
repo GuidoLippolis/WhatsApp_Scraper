@@ -48,7 +48,6 @@ from whatsapp.constants import VIDEO_PLAY_BUTTON_XPATH
 from whatsapp.constants import DOWNLOAD_BUTTON_XPATH
 from whatsapp.constants import CLOSE_BUTTON_MEDIA_XPATH
 from whatsapp.constants import MESSAGE_METADATA_FORMAT
-from whatsapp.constants import MESSAGE_METADATA_FORMAT_ENGLISH
 from whatsapp.constants import XPATH_IMAGES
 from whatsapp.constants import XPATH_AUDIOS
 from whatsapp.constants import XPATH_GIFS
@@ -132,7 +131,8 @@ class Whatsapp(webdriver.Chrome):
             archivedChatsButton = self.find_elements(by=By.XPATH, value=ARCHIVED_CHATS_BUTTON)
             
             if(len(archivedChatsButton) == 0):
-                raise ArchivedChatsButtonNotFoundException("ERRORE! IL BOTTONE DELLE CHAT ARCHIVIATE NON E' PRESENTE! \n")
+                logging.error("IL BOTTONE DELLE CHAT ARCHIVIATE NON E' PRESENTE")
+                raise ArchivedChatsButtonNotFoundException("IL BOTTONE DELLE CHAT ARCHIVIATE NON E' PRESENTE! \n")
             else:
                 time.sleep(5)
                 self.waitForElementToAppear(500, ARCHIVED_CHATS_BUTTON)
@@ -173,7 +173,7 @@ class Whatsapp(webdriver.Chrome):
           
 
 
-    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox, tree, destinationPath, statesDict, output):
+    def getAllChatsDefault(self, timestamp, downloadMediaCheckbox, tree, destinationPath, statesDict, output, paths_parser):
         
         pixels = 0
         pre_height = 0
@@ -199,7 +199,7 @@ class Whatsapp(webdriver.Chrome):
                         os.chdir(destinationPath)
                         self.downloadMedia(statesDict, output)
                         # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
-                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName, paths_parser)
                         # I file vengono zippati nella stessa cartella
                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                         self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
@@ -234,7 +234,7 @@ class Whatsapp(webdriver.Chrome):
                                     os.chdir(destinationPath)
                                     self.downloadMedia(statesDict, output)
                                     # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
-                                    self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                                    self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName, paths_parser)
                                     # I file vengono zippati nella stessa cartella
                                     self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                                     self.zipHasher(destinationPath + "\\" + path + "\\" + contactName)
@@ -259,7 +259,6 @@ class Whatsapp(webdriver.Chrome):
                         downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output, language):
 
         paths_parser = self.getParser()
-        print(paths_parser[PATHS][DIRECTORY_CALLBACK])
         
         timestamp = self.getTimeStamp();
         # Entro nella cartella di destinazione (es. ../Output/)
@@ -327,7 +326,6 @@ class Whatsapp(webdriver.Chrome):
                     while True:
                         updatedList = []
                         nScrolls += 1
-                        print('Scroll n. ' + str(nScrolls) + '... \n')
                         pixels += PIXELS_TO_SCROLL
                         self.execute_script('document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTo(0,' + str(pixels) + ')')
                         new_height = self.execute_script('return document.getElementById("' + CHAT_SECTION_HTML_ID + '").scrollTop')
@@ -353,7 +351,7 @@ class Whatsapp(webdriver.Chrome):
                                         os.chdir(destinationPath)
                                         self.downloadMedia(statesDict, output)
                                         # Una volta scaricati i file, li metto nella cartella ../Output/SCRAPED_timestamp/nome_contatto/
-                                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName)
+                                        self.moveFilesToMainDirectory(destinationPath + "\\" + path + "\\" + contactName, paths_parser)
                                         # I file vengono zippati nella stessa cartella
                                         self.zipFiles(destinationPath + "\\" + path + "\\" + contactName, contactName)
                                         self.zipHasher(path + "\\" + contactName)
@@ -376,7 +374,8 @@ class Whatsapp(webdriver.Chrome):
                             break
         
         else:
-            self.getAllChatsDefault(timestamp, downloadMediaCheckbox, tree, destinationPath, statesDict, output)
+            self.getAllChatsDefault(timestamp, downloadMediaCheckbox, tree, destinationPath, statesDict, output,
+                                    paths_parser)
                     
         if(unarchiveChatsCheckbox == 1):
             self.archiveChats(unarchivedContacts)
@@ -387,7 +386,6 @@ class Whatsapp(webdriver.Chrome):
         
         setUnarchivedChats = set(unarchivedContacts)
         pixels = 0
-        # Lista di stringhe
         archivedContacts = []
         scriptGoBack = "document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollTo(0," + "-document.getElementById('" + CHAT_SECTION_HTML_ID + "').scrollHeight)"
         
@@ -404,22 +402,14 @@ class Whatsapp(webdriver.Chrome):
                 continue
             else:
                 
-                print('Stampo il contenuto di chats: \n')
                 for c in chats:
                     if(len(c.get_attribute('title')) != 0):
                         chats2.append(c)
-                print(self.fillNameList(chats2))
-                
-                print('\n ### \n')
-                print('Stampo le chat da archiviare: \n')
-                print(unarchivedContacts)
-                
                 
                 for chat in chats2:
                     name = chat.get_attribute('title')
-                    print('Sto cercando di prendere il contatto ' + name)
-                    print('\n')
                     if(name in list(setContactsToArchive) and name not in archivedContacts):
+                        logging.info(f'Sto cercando di archiviare il contatto {name}')
                         time.sleep(2)
                         ActionChains(self).move_to_element(chat).perform()
                         time.sleep(1)
@@ -463,6 +453,7 @@ class Whatsapp(webdriver.Chrome):
             logging.info(f'Sono stati trovati {numMessages} messaggi di testo')
             
             if(len(messages) == 0 or len(textMessages) == 0):
+                logging.error('QUESTA CHAT NON CONTIENE MESSAGGI DI TESTO')
                 raise NoMessagesException("QUESTA CHAT NON CONTIENE MESSAGGI DI TESTO!")
             else:
             
@@ -843,7 +834,6 @@ class Whatsapp(webdriver.Chrome):
         downloads_path = paths_parser[PATHS][DOWNLOADS_PATH]
         directory_callback = paths_parser[PATHS][DIRECTORY_CALLBACK]
         
-        # print('\n ##### SONO ENTRATO NELLA CARTELLA ' + DOWNLOADS_PATH + ' E SPOSTO I FILE IN ' + destinationPath + ' ##### \n')
         logging.info(f'Sono entrato nella cartella {downloads_path} e sto spostando i file in {destinationPath}')
         
         filesInDownloadsFolder = os.listdir()
@@ -905,9 +895,6 @@ class Whatsapp(webdriver.Chrome):
                         sha512.update(chunk)
                         md5.update(chunk)
                         
-                    print('{}: {}'.format(sha512.name, sha512.hexdigest()))
-                    print('{}: {}'.format(md5.name, md5.hexdigest()))
-                    
                     logging.info(f'Message digest del file {fileName} generato con algoritmo ' + '{}'.format(sha512.name) + ' {}'.format(sha512.hexdigest()))
                     logging.info(f'Message digest del file {fileName} generato con algoritmo ' + '{}'.format(md5.name) + ' {}'.format(md5.hexdigest()))
                     

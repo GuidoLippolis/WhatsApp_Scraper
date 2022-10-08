@@ -261,6 +261,9 @@ class Whatsapp(webdriver.Chrome):
     def findChatToScrap(self, tree, pathToCSV, destinationPath, 
                         downloadMediaCheckbox, unarchiveChatsCheckbox, statesDict, output, language):
 
+        if(len(destinationPath) == 0):
+            destinationPath = os.getcwd()
+        
         paths_parser = self.getParser()
         
         timestamp = self.getTimeStamp();

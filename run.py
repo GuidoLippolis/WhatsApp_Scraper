@@ -24,6 +24,7 @@ language_parser = ConfigParser()
 language_parser.read(language_file)
 
 pathToCSV = ''
+destinationPath = ''
 
 def changeLanguage(index, value, op):
     
@@ -65,6 +66,7 @@ def changeLanguage(index, value, op):
 
 def selectDestinationFolder():
     global destinationPath
+    destinationPath = ''
     path = filedialog.askdirectory()
     choose_dest_label.configure(text=path)
     destinationPath = path
